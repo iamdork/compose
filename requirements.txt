@@ -1,0 +1,2 @@
+docker-compose==1.7.1
+gitpython
