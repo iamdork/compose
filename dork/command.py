@@ -1,27 +1,30 @@
-import compose.cli.main
+from compose.cli.main import TopLevelCommand
 import dork.snapshot
 
 
-class DorkTopLevelCommand(compose.cli.main.TopLevelCommand):
-    __doc__ = compose.cli.main.TopLevelCommand.__doc__ + \
+class DorkTopLevelCommand(TopLevelCommand):
+    __doc__ = TopLevelCommand.__doc__ + \
               "  dork               Save or restore runtime data snapshots."
 
     def dork(self, options):
         """
         Save or restore volume snapshots.
-        Usage: dork COMMAND [SNAPSHOT]
+        Usage: dork COMMAND [SNAPSHOT...]
 
         Commands:
-          save   Store current state as snapshot.
-          load   Load a specific snapshot.
-          list   List all available snapshots.
-          clear  Reset runtime data.
+          save   Store volumes state as snapshot.
+          load   Load the closest snapshot or a specific one.
+          reset  Reset currently used volumes.
+          ls     List all available snapshots.
+          rm     Clean up snapshots or remove a specific one.
         """
         if options['COMMAND'] == 'save':
-            dork.snapshot.save(options['SNAPSHOT'])
+            dork.snapshot.save(options['SNAPSHOT'][0] if options['SNAPSHOT'] else None)
         if options['COMMAND'] == 'load':
-            dork.snapshot.load(options['SNAPSHOT'])
-        if options['COMMAND'] == 'clear':
-            dork.snapshot.clear()
+            dork.snapshot.load(options['SNAPSHOT'][0] if options['SNAPSHOT'] else None)
+        if options['COMMAND'] == 'reset':
+            dork.snapshot.reset()
+        if options['COMMAND'] == 'rm':
+            dork.snapshot.rm(options['SNAPSHOT'])
         if options['COMMAND'] == 'ls':
             dork.snapshot.ls()

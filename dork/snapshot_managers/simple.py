@@ -36,6 +36,10 @@ def initialize():
     __mkdir(simple_volume_dir())
 
 
+def remove():
+    shutil.rmtree(simple_volume_dir())
+
+
 def save(name):
     snapshot = '%s/%s' % (simple_snapshot_dir(), name)
     volume = simple_volume_dir()
@@ -43,6 +47,12 @@ def save(name):
     shutil.rmtree(snapshot, ignore_errors=True)
     # Copy the volumes directory to the
     shutil.copytree(volume, snapshot)
+
+
+def rm(name):
+    snapshot = '%s/%s' % (simple_snapshot_dir(), name)
+    # Remove the current snapshot, if one exists.
+    shutil.rmtree(snapshot, ignore_errors=True)
 
 
 def load(name):
@@ -54,7 +64,7 @@ def load(name):
     shutil.copytree(snapshot, volume)
 
 
-def clear():
+def reset():
     volume = simple_volume_dir()
     # Remove the current volume directory.
     shutil.rmtree(volume, ignore_errors=True)
@@ -76,5 +86,6 @@ def process_config(config):
                         volume.external,
                         volume.internal
                     ))
+    return config
     # Create a new config without volumes.
     return Config(config.version, config.services, {}, config.networks)
