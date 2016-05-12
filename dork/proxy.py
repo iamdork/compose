@@ -18,11 +18,6 @@ def subdomain():
     return project() if project() == instance() else '%s--%s' % (project(), instance())
 
 
-@env('DORK_DEFAULT_SERVICE')
-def default_service():
-    return 'http'
-
-
 def proxy_container(client):
     if not client.images(name=proxy_image):
         log.info('Pulling %s image.' % proxy_image)
@@ -76,10 +71,12 @@ def process_config(config):
                     if external and internal:
                         if 'environment' not in service:
                             service['environment'] = {}
-                        if service['name'] == default_service():
+                        if external == '80' or external == '443':
                             service['environment']['VIRTUAL_HOST'] = '%s.%s' % (subdomain(), domain())
                         else:
                             service['environment']['VIRTUAL_HOST'] = '%s--%s.%s' % (service['name'], subdomain(), domain())
+                        if external == '443':
+                            service['environment']['VIRTUAL_PROTO'] = 'https'
                         service['environment']['VIRTUAL_PORT'] = int(internal)
             service['ports'] = []
     return config
