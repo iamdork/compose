@@ -4,17 +4,16 @@ import dork.snapshot
 
 class DorkTopLevelCommand(TopLevelCommand):
     __doc__ = TopLevelCommand.__doc__ + \
-              "  dork               Save or restore runtime data snapshots."
+              "  snapshot           Save or restore runtime data snapshots."
 
-    def dork(self, options):
+    def snapshot(self, options):
         """
         Save or restore volume snapshots.
-        Usage: dork COMMAND [SNAPSHOT...]
+        Usage: snapshot COMMAND [SNAPSHOT...]
 
         Commands:
           save   Store volumes state as snapshot.
           load   Load the closest snapshot or a specific one.
-          reset  Reset currently used volumes.
           ls     List all available snapshots.
           rm     Clean up snapshots or remove a specific one.
         """
@@ -22,8 +21,6 @@ class DorkTopLevelCommand(TopLevelCommand):
             dork.snapshot.save(options['SNAPSHOT'][0] if options['SNAPSHOT'] else None)
         if options['COMMAND'] == 'load':
             dork.snapshot.load(options['SNAPSHOT'][0] if options['SNAPSHOT'] else None)
-        if options['COMMAND'] == 'reset':
-            dork.snapshot.reset()
         if options['COMMAND'] == 'rm':
             dork.snapshot.rm(options['SNAPSHOT'])
         if options['COMMAND'] == 'ls':
