@@ -30,26 +30,10 @@ else
     DOCKER_ADDR="-e DOCKER_HOST -e DOCKER_TLS_VERIFY -e DOCKER_CERT_PATH"
 fi
 
-# Dork default variables.
-DORK_REPOSITORY_PATH=${DORK_REPOSITORY_PATH:=$(pwd)}
-DORK_SNAPSHOT_MANAGER=${DORK_SNAPSHOT_MANAGER:='simple'}
-
 # Pass dork environment variables.
-DORK_ENV="-e DORK_ROOT_PATH -e DORK_DOMAIN -e DORK_SUBDOMAIN -e DORK_SNAPSHOT_MANAGER -e DORK_PROJECT -e DORK_INSTANCE"
-
-# Mount the current repository as a volume.
-DORK_VOLUMES="-v $DORK_REPOSITORY_PATH:$DORK_REPOSITORY_PATH"
-
-# If we are using the simple snapshot manager, also mount volumes and snapshot directories.
-if [ "$DORK_SNAPSHOT_MANAGER" == 'simple' ]; then
-  DORK_SIMPLE_VOLUME_PATH=${DORK_SIMPLE_VOLUME_PATH:='/var/dork/volumes'}
-  DORK_SIMPLE_SNAPSHOT_PATH=${DORK_SIMPLE_SNAPSHOT_PATH:='/var/dork/snapshots'}
-
-  DORK_VOLUMES="$DORK_VOLUMES -v $DORK_SIMPLE_VOLUME_PATH:$DORK_SIMPLE_VOLUME_PATH"
-  DORK_VOLUMES="$DORK_VOLUMES -v $DORK_SIMPLE_SNAPSHOT_PATH:$DORK_SIMPLE_SNAPSHOT_PATH"
-  DORK_ENV="$DORK_ENV -e DORK_SIMPLE_VOLUME_PATH -e DORK_SIMPLE_SNAPSHOT_PATH"
+if [ -n "$DORK_PLUGINS" ]; then
+  DORK_ENV="-e DORK_PLUGINS"
 fi
-
 
 # Setup volume mounts for compose config and context
 if [ "$(pwd)" != '/' ]; then
