@@ -22,7 +22,7 @@ import compose.cli.main
 # multi: Assume single layer of multiple different projects.
 # repo:  Turn on git auto snapshots.
 # proxy: Run the proxy service.
-DEFAULT_PLUGINS = 'env:lib:multi:repo:filesystem:proxy'
+DEFAULT_PLUGINS = 'env:lib:multi:git:filesystem:proxy'
 
 
 def run():
@@ -94,31 +94,24 @@ def run():
 
             def initialize(self):
                 for plugin in plugins:
-                    plugin.initialize_volumes(self.volumes)
+                    plugin.initializing_volumes(self.volumes)
                 return super(DorkProjectVolumes, self).initialize()
 
             def remove(self):
                 super(DorkProjectVolumes, self).remove()
                 for plugin in plugins:
-                    plugin.remove_volumes(self.volumes)
+                    plugin.removed_volumes(self.volumes)
 
         class DorkProjectNetworks(ProjectNetworks):
-
-            @classmethod
-            def from_services(cls, services, networks, use_networking):
-                instance = super(DorkProjectNetworks, cls)\
-                    .from_services(services, networks, use_networking)
-                instance.services = services
-                return instance
 
             def initialize(self):
                 super(DorkProjectNetworks, self).initialize()
                 for plugin in plugins:
-                    plugin.initialize_networks(self.networks, self.services)
+                    plugin.initialized_networks(self.networks)
 
             def remove(self):
                 for plugin in plugins:
-                    plugin.remove_networks(self.networks, self.services)
+                    plugin.removing_networks(self.networks)
                 super(DorkProjectNetworks, self).remove()
 
         class DorkConfig(Config):

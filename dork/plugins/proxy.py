@@ -1,56 +1,67 @@
 import dork.plugin
-import logging
 from docker import Client
 from dork.helpers import notdefault, tru
 import os
 import glob
-log = logging.getLogger(__name__)
-
-proxy_image = 'jwilder/nginx-proxy'
-
-
-def proxy_container(client):
-    if not client.images(name=proxy_image):
-        log.info('pulling %s image.' % proxy_image)
-        client.pull(proxy_image)
-
-    if not client.containers(filters={'name': 'dork_proxy'}, all=True):
-        log.info('creating proxy container.')
-        client.create_container(
-            image=proxy_image,
-            name='dork_proxy',
-            detach=True
-        )
-
-    container = client.containers(filters={'name': 'dork_proxy'}, all=True)[0]
-    if not container['State'] == 'running':
-        log.info('starting proxy container.')
-        binds = ['/run/docker.sock:/tmp/docker.sock:ro']
-        if 'DORK_PROXY_AUTH_DIR' in os.environ:
-            binds.append('%s:/etc/nginx/htpasswd' % os.path.expanduser(os.environ['DORK_PROXY_AUTH_DIR']))
-        client.start(
-            container=container,
-            binds=binds,
-            port_bindings={'80': '80', '443': '443'},
-        )
-    return container
 
 
 class Plugin(dork.plugin.Plugin):
 
     def initialize(self):
+        self.hosts = {}
         self.__client = Client()
 
-    def domain(self, service=None):
+    def service_domain(self, service=None):
         return '--'.join(filter(tru, [
             service,
             notdefault(self.project),
             notdefault(self.instance)
-        ])) + '.' + self.base_domain
+        ])) + '.' + self.proxy_domain
 
     @property
-    def base_domain(self):
+    def auth_dir(self):
+        name = 'DORK_PROXY_AUTH_DIR'
+        return os.path.expanduser(self.env[name]) if name in self.env else None
+
+    @property
+    def proxy_domain(self):
         return self.env.get('DORK_PROXY_DOMAIN', '127.0.0.1.xip.io')
+
+    @property
+    def proxy_image(self):
+        return self.env.get('DORK_PROXY_IMAGE', 'jwilder/nginx-proxy')
+
+    @property
+    def proxy_service(self):
+        if not self.__client.images(name=self.proxy_image):
+            self.log.info('pulling %s image.' % self.proxy_image)
+            self.__client.pull(self.proxy_image)
+
+        if not self.__client.containers(filters={'name': 'dork_proxy'}, all=True):
+            self.log.info('creating proxy container.')
+            self.__client.create_container(
+                image=self.proxy_image,
+                name='dork_proxy',
+                detach=True
+            )
+
+        container = self.__client.containers(filters={'name': 'dork_proxy'}, all=True)[0]
+
+        if not container['State'] == 'running':
+            self.log.info('starting proxy container.')
+            binds = ['/run/docker.sock:/tmp/docker.sock:ro']
+            if self.auth_dir:
+                binds.append('%s:/etc/nginx/htpasswd' % self.auth_dir)
+            self.__client.start(
+                container=container,
+                binds=binds,
+                port_bindings={'80': '80', '443': '443'},
+            )
+        return container
+
+    def reload_proxy(self):
+        ex = self.__client.exec_create(self.proxy_service, 'nginx -s reload')
+        self.__client.exec_start(ex)
 
     def preprocess_config(self, config):
         for service in config.services:
@@ -61,26 +72,13 @@ class Plugin(dork.plugin.Plugin):
                         if external and internal:
                             if 'environment' not in service:
                                 service['environment'] = {}
-                            domain = self.domain() if external == '80' or external == '443' else self.domain(service['name'])
+                            domain = self.service_domain() if external == '80' or external == '443' else self.service_domain(service['name'])
+                            self.hosts[service['name']] = domain
                             service['environment']['VIRTUAL_HOST'] = domain
                             if external == '443':
                                 service['environment']['VIRTUAL_PROTO'] = 'https'
                             service['environment']['VIRTUAL_PORT'] = int(internal)
                 service['ports'] = []
-
-
-        if 'DORK_PROXY_AUTH_DIR' not in os.environ:
-            return
-        auth = self.collect_auth_files()
-        for service in config.services:
-            file = []
-            if '.auth' in auth:
-                file.extend(auth['.auth'])
-            if '.auth.%s' % service['name'] in auth:
-                file.extend(auth['.auth.%s' % service['name']])
-            if file and 'environment' in service and 'VIRTUAL_HOST' in service['environment']:
-                with open('%s/%s' % (os.path.expanduser(os.environ['DORK_PROXY_AUTH_DIR']), service['environment']['VIRTUAL_HOST']), mode='w+') as f:
-                    f.writelines(file)
 
     def collect_auth_files(self):
         files = {}
@@ -103,17 +101,36 @@ class Plugin(dork.plugin.Plugin):
 
         return files
 
-    def initialize_networks(self, networks, services):
+    def initialized_networks(self, networks):
+
+        if self.auth_dir:
+            auth = self.collect_auth_files()
+            for name, host in self.hosts.iteritems():
+                file = []
+                if '.auth' in auth:
+                    file.extend(auth['.auth'])
+                if '.auth.%s' % name in auth:
+                    file.extend(auth['.auth.%s' % name])
+                if file :
+                    with open('%s/%s' % (self.auth_dir, host), mode='w+') as f:
+                        f.writelines(file)
+
         if 'default' in networks:
             network = networks['default'].full_name
-            container = proxy_container(self.__client)
-            if network not in container['NetworkSettings']['Networks']:
-                self.__client.connect_container_to_network(container, network)
+            if network not in self.proxy_service['NetworkSettings']['Networks']:
+                self.__client.connect_container_to_network(self.proxy_service, network)
+                self.reload_proxy()
 
+    def removing_networks(self, networks):
 
-    def remove_networks(self, networks, services):
+        if self.auth_dir:
+            for name, host in self.hosts.iteritems():
+                f = '%s/%s' % (self.auth_dir, host)
+                if os.path.exists(f):
+                    os.remove(f)
+
         if 'default' in networks:
             network = networks['default'].full_name
-            container = proxy_container(self.__client)
-            if network in container['NetworkSettings']['Networks']:
-                self.__client.disconnect_container_from_network(container, network)
+            if network in self.proxy_service['NetworkSettings']['Networks']:
+                self.__client.disconnect_container_from_network(self.proxy_service, network)
+                self.reload_proxy()

@@ -8,7 +8,7 @@ class Plugin(dork.plugin.Plugin):
 
     @property
     def volumes(self):
-        return self.env.get('DORK_FILESYSTEM_VOLUME_PATH', '/var/dork/volumes')
+        return os.path.expanduser(self.env.get('DORK_FILESYSTEM_VOLUME_PATH', '/var/dork/volumes'))
 
     @property
     def volume(self):
@@ -20,7 +20,7 @@ class Plugin(dork.plugin.Plugin):
 
     @property
     def snapshots(self):
-        return self.env.get('DORK_FILESYSTEM_SNAPSHOT_PATH', '/var/dork/snapshots')
+        return os.path.expanduser(self.env.get('DORK_FILESYSTEM_SNAPSHOT_PATH', '/var/dork/snapshots'))
 
     @property
     def snapshot(self):
@@ -44,11 +44,11 @@ class Plugin(dork.plugin.Plugin):
         for key in config.volumes.keys():
             del config.volumes[key]
 
-    def initialize_volumes(self, volumes):
+    def initializing_volumes(self, volumes):
         self.__mkdir(self.snapshots)
         self.__mkdir(self.volumes)
 
-    def remove_volumes(self, volumes):
+    def removed_volumes(self, volumes):
         shutil.rmtree(self.volumes)
 
     def snapshot_save(self, snapshots=()):

@@ -1,6 +1,7 @@
 import os
 import contextlib
 from helpers import notdefault, tru
+import logging
 
 
 @contextlib.contextmanager
@@ -59,6 +60,7 @@ class Plugin:
 
     def __init__(self, env):
         self.env = env.copy()
+        self.log = logging.getLogger(__name__)
 
     def initialize(self):
         pass
@@ -90,31 +92,31 @@ class Plugin:
         """
         pass
 
-    def initialize_volumes(self, volumes):
+    def initializing_volumes(self, volumes):
         """
-        Act before volumes are initialized by docker-compose.
+        Act before volumes were initialized by docker-compose.
 
         :type volumes: list[compose.volume.Volume]
         """
         pass
 
-    def remove_volumes(self, volumes):
+    def removed_volumes(self, volumes):
         """
-        Act before volumes are removed by docker-compose.
+        Act after volumes are removed by docker-compose.
 
         :type volumes: list[compose.volume.Volume]
         """
         pass
 
-    def initialize_networks(self, networks, services):
+    def initialized_networks(self, networks):
         """
-        Act before networks are initialized by docker-compose.
+        Act after networks are initialized by docker-compose.
 
         :type volumes: list[compose.network.Network]
         """
         pass
 
-    def remove_networks(self, volumes, services):
+    def removing_networks(self, networkds):
         """
         Act before networks are removed by docker-compose.
 
