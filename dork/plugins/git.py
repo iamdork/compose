@@ -6,7 +6,11 @@ from gitdb.exc import BadName
 class Plugin(dork.plugin.Plugin):
 
     def initialize(self):
-        self.__repo = Repo(self.basedir)
+        try:
+            self.__repo = Repo(self.basedir)
+            return True
+        except Exception:
+            return False
 
     def __commit(self, hash):
         try:

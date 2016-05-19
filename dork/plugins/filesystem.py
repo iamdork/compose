@@ -8,7 +8,7 @@ class Plugin(dork.plugin.Plugin):
 
     @property
     def volumes(self):
-        return os.path.expanduser(self.env.get('DORK_FILESYSTEM_VOLUME_PATH', '/var/dork/volumes'))
+        return os.path.expanduser(self.env.get('DORK_FILESYSTEM_VOLUME_PATH', '~/.dork/volumes'))
 
     @property
     def volume(self):
@@ -20,7 +20,7 @@ class Plugin(dork.plugin.Plugin):
 
     @property
     def snapshots(self):
-        return os.path.expanduser(self.env.get('DORK_FILESYSTEM_SNAPSHOT_PATH', '/var/dork/snapshots'))
+        return os.path.expanduser(self.env.get('DORK_FILESYSTEM_SNAPSHOT_PATH', '~/.dork/snapshots'))
 
     @property
     def snapshot(self):
@@ -53,17 +53,17 @@ class Plugin(dork.plugin.Plugin):
 
     def snapshot_save(self, snapshots=()):
         for name in snapshots:
-            snapshot = '%s/%s' % (self.snapshots, name)
+            snapshot = '%s/%s' % (self.snapshot, name)
             # Remove the current snapshot, if one exists.
             shutil.rmtree(snapshot, ignore_errors=True)
             # Copy the volumes directory to the
             shutil.copytree(self.volume, snapshot)
 
     def snapshot_load(self, snapshots=()):
-        options = set(self.snapshot_ls()) & set(snapshots)
+        options = list(set(self.snapshot_ls()) & set(snapshots))
         if len(options):
             name = options[-1]
-            snapshot = '%s/%s' % (self.snapshots, name)
+            snapshot = '%s/%s' % (self.snapshot, name)
             # Remove the current volume directory.
             shutil.rmtree(self.volume, ignore_errors=True)
             # Copy the snapshot as new volume.
@@ -73,13 +73,13 @@ class Plugin(dork.plugin.Plugin):
 
     def snapshot_rm(self, snapshots=()):
         for name in snapshots:
-            snapshot = '%s/%s' % (self.snapshots, name)
+            snapshot = '%s/%s' % (self.snapshot, name)
             # Remove the current snapshot, if one exists.
             if os.path.exists(snapshot):
                 shutil.rmtree(snapshot)
-                yield snapshot
+                yield name
 
     def snapshot_ls(self):
-        return [path for path in os.listdir(self.snapshots)]
+        return [path for path in os.listdir(self.snapshot)]
 
 

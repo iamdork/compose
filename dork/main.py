@@ -1,5 +1,6 @@
 import os
 import re
+import itertools
 
 from compose.cli.main import TopLevelCommand
 from compose.volume import ProjectVolumes
@@ -36,12 +37,15 @@ def run():
                 super(DorkTopLevelCommand, self).__init__(project, project_dir)
 
             def __snapshots(self):
-                return [s for s in [p.snapshot_ls() for p in plugins]]
+                snapshots = []
+                for plugin in plugins:
+                    snapshots.extend(plugin.snapshot_ls())
+                return snapshots
 
             def snapshot(self, options):
                 """
                 Save or restore volume snapshots.
-                Usage: snapshot COMMAND [snapshots...]
+                Usage: snapshot COMMAND [SNAPSHOTS...]
 
                 Commands:
                   save   Store volumes state as snapshot.
@@ -49,7 +53,7 @@ def run():
                   ls     List all available snapshots.
                   rm     Clean up snapshots or remove a specific one.
                 """
-                getattr(self, '_snapshot_' + options['COMMAND'])(options['snapshots'])
+                getattr(self, '_snapshot_' + options['COMMAND'])(options['SNAPSHOTS'])
 
             def _snapshot_save(self, names=()):
                 # If the provided names list is empty, collect plugins for
@@ -69,11 +73,15 @@ def run():
 
                 # Iterate plugins from the right and stop when the first one
                 # successfully loaded a snapshot.
+
+                self.project.stop()
                 for plugin in reversed(plugins):
                     loaded = plugin.snapshot_load(names)
                     if loaded:
                         print(loaded)
                         break
+
+                self.project.start()
 
             def _snapshot_rm(self, names=()):
                 # If the names list is empty, collect most removable snapshots
@@ -82,7 +90,7 @@ def run():
                     names = filter(tru, [p.snapshot_autoclean(self.__snapshots()) for p in plugins])
 
                 for plugin in plugins:
-                    for removed in plugin.snapshot_remove(names):
+                    for removed in plugin.snapshot_rm(names):
                         print(removed)
 
             def _snapshot_ls(self, snapshots=()):

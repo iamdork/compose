@@ -29,8 +29,7 @@ def load(plugins):
         instances.append(instance)
         environment.update(instance.environment())
 
-    for instance in instances:
-        instance.initialize()
+    instances = filter(lambda i: i.initialize(), instances)
 
     # If there is no explicit project name in the environment, set
     # [project]--[instance]
@@ -63,7 +62,7 @@ class Plugin:
         self.log = logging.getLogger(__name__)
 
     def initialize(self):
-        pass
+        return True
 
     def cleanup(self):
         pass
