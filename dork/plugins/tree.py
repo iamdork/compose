@@ -27,7 +27,7 @@ class Plugin(dork.plugin.Plugin):
     def environment(self):
         root = self.env.get('DORK_TREE_ROOT', '/var/source')
         blacklist = self.env.get('DORK_TREE_BLACKLIST', 'feature;hotfix;release')
-        path = segments(root, self.env['DORK_REPOSITORY_PATH'], blacklist.split(';'))
+        path = segments(root, self.basedir, blacklist.split(';'))
         return {
             'DORK_TREE_ROOT': root,
             'DORK_TREE_BLACKLIST': blacklist,

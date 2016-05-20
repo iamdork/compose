@@ -11,7 +11,7 @@ def load(plugins):
     environment = {
         'DORK_PROJECT': 'default',
         'DORK_INSTANCE': 'default',
-        'DORK_REPOSITORY_PATH': os.path.abspath(os.curdir)
+        'DORK_SOURCE': os.path.abspath(os.curdir)
     }
     environment.update(os.environ)
 
@@ -72,7 +72,7 @@ class Plugin:
 
     @property
     def basedir(self):
-        return self.env['DORK_REPOSITORY_PATH']
+        return self.env['DORK_SOURCE']
 
     @property
     def project(self):
