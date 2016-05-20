@@ -1,9 +1,9 @@
-import dork.plugin
+import dork_compose.plugin
 from git import Repo
 from gitdb.exc import BadName
 
 
-class Plugin(dork.plugin.Plugin):
+class Plugin(dork_compose.plugin.Plugin):
 
     def initialize(self):
         try:

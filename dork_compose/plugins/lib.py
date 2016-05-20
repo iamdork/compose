@@ -1,10 +1,10 @@
-import dork.plugin
+import dork_compose.plugin
 import os
 import shutil
 import tempfile
 
 
-class Plugin(dork.plugin.Plugin):
+class Plugin(dork_compose.plugin.Plugin):
     def initialize(self):
         self.tempdirs = []
         if self.library:
@@ -40,7 +40,7 @@ class Plugin(dork.plugin.Plugin):
         # - mounting if possible?
         shutil.copytree(self.basedir, '%s/%s' % (dirname, self.source))
         service.options['build']['context'] = dirname
-        dork.plugin.Plugin.building_service(self, service)
+        dork_compose.plugin.Plugin.building_service(self, service)
 
     def cleanup(self):
         for d in self.tempdirs:

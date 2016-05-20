@@ -1,7 +1,7 @@
-import dork.plugin
+import dork_compose.plugin
 
 
-class Plugin(dork.plugin.Plugin):
+class Plugin(dork_compose.plugin.Plugin):
     def environment(self):
         return {
             'DORK_PROJECT': self.get_project()

@@ -1,10 +1,10 @@
-import dork.plugin
+import dork_compose.plugin
 import os
 import shutil
 from compose.config.config import VolumeSpec
 
 
-class Plugin(dork.plugin.Plugin):
+class Plugin(dork_compose.plugin.Plugin):
 
     @property
     def volumes(self):

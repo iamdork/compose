@@ -1,11 +1,11 @@
-import dork.plugin
+import dork_compose.plugin
 from docker import Client
-from dork.helpers import notdefault, tru
+from dork_compose.helpers import notdefault, tru
 import os
 import glob
 
 
-class Plugin(dork.plugin.Plugin):
+class Plugin(dork_compose.plugin.Plugin):
 
     def initialize(self):
         self.hosts = {}

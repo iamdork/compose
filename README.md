@@ -65,7 +65,7 @@ There are no configuration files. Plugins can be configured using environment va
 
 ### Custom plugins
 
-It's possible to create and load custom plugins. Simply create a Python file with one class called *Plugin* that extends `dork.plugin.Plugin` and attach it to the `DORK_PLUGINS` variable:
+It's possible to create and load custom plugins. Simply create a Python file with one class called *Plugin* that extends `dork_compose.plugin.Plugin` and attach it to the `DORK_PLUGINS` variable:
 
 ```
 env:lib:multi:git:filesystem:proxy:my_plugin=~/path/to/myplugin.py
@@ -76,14 +76,11 @@ For example plugins have a look at the `plugins` package inside the `dork-compos
 ## Snapshots
 
 `dork-compose` is able to create snapshots of all data volumes used in a compose project. This is done by using the additional `dork-compose snapshot` command.
-
-**Example:**
-Let's assume your project defines two data volumes. One for the database (`db`), the other one for uploaded files (`files`). Setup and install the application as usual. After adding test data run `dork-compose snapshot save my_snapshot` to store all runtime information in a snapshot.
-The next time you want to set up a new instance of this project, for example for feature branch without messing up your current database, you just start the project with `dork-compose up` and run `dork-compose snapshot load my_snapshot`. The previously saved database and uploaded files are immediately ready to go. No setup or install process.
+For an example of how to work with snapshots, please refer to the *drupal-simple* example in the [examples repository](https://github.com/iamdork/examples).
 
 ### Projects & Instances
 
-This example already introduced the concept of *projects* and *instances*. `dork-compose` assumes that instances of the same project are compatible. Aside from building the proxy domain, the major purpose is to restrict snapshots to be used by instances of the same project only.
+Containers are organized in  *projects* and *instances*. `dork-compose` assumes that instances of the same project are compatible. Aside from building the proxy domain, the major purpose is to restrict snapshots to be used by instances of the same project only.
 
 The current *project* and *instance* is determined by plugins (like *multi* in the default setup) or by the `DORK_PROJECT` and `DORK_INSTANCE` environment variables.
 

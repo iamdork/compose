@@ -1,7 +1,7 @@
-import dork.plugin
+import dork_compose.plugin
 
 
-class Plugin(dork.plugin.Plugin):
+class Plugin(dork_compose.plugin.Plugin):
     def get_instance(self):
         return self.basedir.split('/')[-1]
 

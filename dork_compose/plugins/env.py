@@ -1,9 +1,9 @@
-import dork.plugin
+import dork_compose.plugin
 import os
 from compose.config.environment import env_vars_from_file
 
 
-class Plugin(dork.plugin.Plugin):
+class Plugin(dork_compose.plugin.Plugin):
     def environment(self):
         # Collect separate environment dict from .env files in
         # current and parent directories.

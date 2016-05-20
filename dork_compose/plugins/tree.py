@@ -1,4 +1,4 @@
-import dork.plugin
+import dork_compose.plugin
 from functools import partial
 
 
@@ -23,7 +23,7 @@ def segments(root, path, blacklist):
     return filter(partial(__filter, blacklist), __path(root, path))
 
 
-class Plugin(dork.plugin.Plugin):
+class Plugin(dork_compose.plugin.Plugin):
     def environment(self):
         root = self.env.get('DORK_TREE_ROOT', '/var/source')
         blacklist = self.env.get('DORK_TREE_BLACKLIST', 'feature;hotfix;release')

@@ -8,7 +8,7 @@ https://github.com/pypa/sampleproject
 # Always prefer setuptools over distutils
 from setuptools import setup, find_packages
 
-version = '0.1.7'
+version = '0.1.8'
 
 setup(
     name='dork-compose',
@@ -82,7 +82,7 @@ setup(
     # pip to create the appropriate form of executable for the target platform.
     entry_points={
         'console_scripts': [
-            'dork-compose=dork:run',
+            'dork-compose=dork_compose:run',
         ],
     },
 )
