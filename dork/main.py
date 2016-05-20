@@ -30,10 +30,13 @@ def run():
     with plugin.load(os.getenv('DORK_PLUGINS', DEFAULT_PLUGINS)) as plugins:
 
         class DorkTopLevelCommand(TopLevelCommand):
-            __doc__ = TopLevelCommand.__doc__ + \
-                      "  snapshot           Save or restore runtime data snapshots." + \
-                      "  info               Display information about services."
+            __doc__ = TopLevelCommand.__doc__ + "\n".join([
+                "  snapshot           Save or restore runtime data snapshots.",
+                "      info               Display information about services."
+            ])
+
             def __init__(self, project, project_dir='.'):
+                print('lala')
                 super(DorkTopLevelCommand, self).__init__(project, project_dir)
 
             def __snapshots(self):
