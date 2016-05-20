@@ -16,3 +16,6 @@ class Plugin(dork.plugin.Plugin):
             if os.path.isfile(envfile):
                 env.update(env_vars_from_file(envfile))
         return env
+
+    def info(self):
+        return self.environment()

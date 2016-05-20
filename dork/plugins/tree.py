@@ -35,3 +35,9 @@ class Plugin(dork.plugin.Plugin):
             'DORK_INSTANCE': '/'.join(path[1:])
         }
 
+    def info(self):
+        return {
+            'Project': self.environment()['DORK_PROJECT'],
+            'Instance': self.environment()['DORK_INSTANCE'],
+        }
+

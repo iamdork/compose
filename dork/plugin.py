@@ -82,6 +82,9 @@ class Plugin:
     def instance(self):
         return self.env['DORK_INSTANCE']
 
+    def info(self):
+        return {}
+
     def preprocess_config(self, config):
         """
         Alter the docker-compose configuration object. The object is passed

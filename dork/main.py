@@ -1,6 +1,5 @@
 import os
 import re
-import itertools
 
 from compose.cli.main import TopLevelCommand
 from compose.service import Service
@@ -32,8 +31,8 @@ def run():
 
         class DorkTopLevelCommand(TopLevelCommand):
             __doc__ = TopLevelCommand.__doc__ + \
-                      "  snapshot           Save or restore runtime data snapshots."
-
+                      "  snapshot           Save or restore runtime data snapshots." + \
+                      "  info               Display information about services."
             def __init__(self, project, project_dir='.'):
                 super(DorkTopLevelCommand, self).__init__(project, project_dir)
 
@@ -55,6 +54,26 @@ def run():
                   rm     Clean up snapshots or remove a specific one.
                 """
                 getattr(self, '_snapshot_' + options['COMMAND'])(options['SNAPSHOTS'])
+
+            def info(self, options):
+                """
+                Display service status information.
+
+                Usage: info
+                """
+                from terminaltables import AsciiTable
+                rows = []
+
+                for plugin in plugins:
+                    for key, value in plugin.info().iteritems():
+                        rows.append([key + ':', value])
+
+                table = AsciiTable(rows)
+                table.outer_border = False
+                table.inner_column_border = False
+                table.inner_heading_row_border = False
+                table.title = 'Dork status information'
+                print table.table
 
             def _snapshot_save(self, names=()):
                 # If the provided names list is empty, collect plugins for

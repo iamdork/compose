@@ -22,6 +22,11 @@ class Plugin(dork.plugin.Plugin):
     def source(self):
         return self.env.get('DORK_LIBRARY_SOURCE', 'source')
 
+    def info(self):
+        return {
+            'Library': self.library
+        }
+
     def building_service(self, service):
         # Assemble the full build context for our service.
         dirname = tempfile.mktemp()

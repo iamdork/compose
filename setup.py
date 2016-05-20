@@ -65,7 +65,8 @@ setup(
     # https://packaging.python.org/en/latest/requirements.html
     install_requires=[
         'docker-compose==1.7.1',
-        'gitpython'
+        'gitpython',
+        'terminaltables'
     ],
 
     # List additional groups of dependencies here (e.g. development
