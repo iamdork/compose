@@ -36,7 +36,6 @@ def run():
             ])
 
             def __init__(self, project, project_dir='.'):
-                print('lala')
                 super(DorkTopLevelCommand, self).__init__(project, project_dir)
 
             def __snapshots(self):
