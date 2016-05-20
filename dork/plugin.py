@@ -115,11 +115,19 @@ class Plugin:
         """
         pass
 
-    def removing_networks(self, networkds):
+    def removing_networks(self, networks):
         """
         Act before networks are removed by docker-compose.
 
         :type volumes: list[compose.network.Network]
+        """
+        pass
+
+    def building_service(self, service):
+        """
+        Alter a service before it will be built.
+        :param service:
+        :return:
         """
         pass
 

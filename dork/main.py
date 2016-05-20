@@ -3,6 +3,7 @@ import re
 import itertools
 
 from compose.cli.main import TopLevelCommand
+from compose.service import Service
 from compose.volume import ProjectVolumes
 from compose.network import ProjectNetworks
 from compose.config.config import Config
@@ -98,6 +99,12 @@ def run():
                     if not snapshots or name in snapshots:
                         print(name)
 
+        class DorkService(Service):
+            def build(self, no_cache=False, pull=False, force_rm=False):
+                for plugin in plugins:
+                    plugin.building_service(self)
+                return super(DorkService, self).build(no_cache, pull, force_rm)
+
         class DorkProjectVolumes(ProjectVolumes):
 
             def initialize(self):
@@ -150,6 +157,9 @@ def run():
 
         # Replace compose TopLevelCommand with custom derivation.
         compose.cli.main.TopLevelCommand = DorkTopLevelCommand
+
+        # Inject our own service derivation to get lifecycle hooks.
+        compose.project.Service = DorkService
 
         # Replace the network controller to inject proxy updates.
         compose.project.ProjectNetworks = DorkProjectNetworks
