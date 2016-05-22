@@ -17,5 +17,5 @@ class Plugin(dork_compose.plugin.Plugin):
                 env.update(env_vars_from_file(envfile))
         return env
 
-    def info(self):
+    def info(self, project):
         return self.environment()

@@ -82,7 +82,7 @@ class Plugin:
     def instance(self):
         return self.env['DORK_INSTANCE']
 
-    def info(self):
+    def info(self, project):
         return {}
 
     def preprocess_config(self, config):

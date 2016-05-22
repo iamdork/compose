@@ -63,11 +63,12 @@ def run():
 
                 Usage: info
                 """
+
                 from terminaltables import AsciiTable
                 rows = []
 
                 for plugin in plugins:
-                    for key, value in plugin.info().iteritems():
+                    for key, value in plugin.info(self.project).iteritems():
                         rows.append([key + ':', value])
 
                 table = AsciiTable(rows)

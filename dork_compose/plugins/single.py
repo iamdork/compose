@@ -10,7 +10,7 @@ class Plugin(dork_compose.plugin.Plugin):
             'DORK_INSTANCE': self.get_instance()
         }
 
-    def info(self):
+    def info(self, project):
         return {
             'Instance': self.get_instance()
         }

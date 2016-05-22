@@ -49,6 +49,17 @@ class Plugin(dork_compose.plugin.Plugin):
             notdefault(self.instance)
         ])) + '.' + self.proxy_domain
 
+    def info(self, project):
+        info = {}
+        auth = self.collect_auth_files()
+        for service in project.services:
+            if 'environment' in service.options and 'VIRTUAL_HOST' in service.options['environment']:
+                key = '"%s" url' % service.name
+                info[key] = service.options['environment'].get('VIRTUAL_PROTO', 'http') + '://' + service.options['environment']['VIRTUAL_HOST']
+                if '.auth' in auth or '.auth.%s' % service.name in auth:
+                    info[key] += ' (password protected)'
+        return info
+
     @property
     def auth_dir(self):
         name = 'DORK_PROXY_AUTH_DIR'

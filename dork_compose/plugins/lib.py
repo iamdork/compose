@@ -22,7 +22,7 @@ class Plugin(dork_compose.plugin.Plugin):
     def source(self):
         return self.env.get('DORK_LIBRARY_SOURCE', 'source')
 
-    def info(self):
+    def info(self, project):
         return {
             'Library': self.library
         }

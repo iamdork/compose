@@ -10,7 +10,7 @@ class Plugin(dork_compose.plugin.Plugin):
     def get_project(self):
         return self.basedir.split('/')[-1]
 
-    def info(self):
+    def info(self, project):
         return {
             'Project': self.get_project()
         }
