@@ -127,6 +127,11 @@ def run():
                     plugin.building_service(self)
                 return super(DorkService, self).build(no_cache, pull, force_rm)
 
+            def start_container(self, container):
+                for plugin in plugins:
+                    plugin.starting_service(self)
+                return super(DorkService, self).start_container(container)
+
         class DorkProjectVolumes(ProjectVolumes):
 
             def initialize(self):

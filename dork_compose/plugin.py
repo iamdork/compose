@@ -134,6 +134,14 @@ class Plugin:
         """
         pass
 
+    def starting_service(self, service):
+        """
+        Alter a service before it will be started.
+        :param service:
+        :return:
+        """
+        pass
+
     def snapshot_save(self, snapshots=()):
         """
         Save the current volumes under the names provided.
