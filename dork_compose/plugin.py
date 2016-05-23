@@ -12,7 +12,8 @@ def load(plugins):
     environment = {
         'DORK_PROJECT': 'default',
         'DORK_INSTANCE': 'default',
-        'DORK_SOURCE': os.path.abspath(os.curdir)
+        'DORK_SOURCE': os.path.abspath(os.curdir),
+        'DORK_DATA_DIR': '~/.dork',
     }
     environment.update(os.environ)
 

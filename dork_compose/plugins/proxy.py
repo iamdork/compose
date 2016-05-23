@@ -7,6 +7,7 @@ import os
 import glob
 import pkg_resources
 from compose.const import API_VERSIONS, COMPOSEFILE_V2_0
+import urlparse
 
 
 class Plugin(dork_compose.plugin.Plugin):
@@ -36,11 +37,14 @@ class Plugin(dork_compose.plugin.Plugin):
 
     @property
     def auth_dir(self):
-        return os.path.expanduser(self.env.get('DORK_PROXY_AUTH_DIR', '~/.dork/auth'))
+        return os.path.expanduser(self.env.get('DORK_PROXY_AUTH_DIR', '%s/auth' % self.env.get('DORK_DATA_DIR')))
 
     @property
     def docker_sock(self):
-        return self.env.get('DOCKER_SOCK', '/run/docker.sock')
+        result = urlparse.urlparse(self.env.get('DOCKER_HOST', 'unix:///var/run/docker.sock'))
+        if result.scheme != 'unix':
+            raise EnvironmentError('Dork proxy works with docker socket api only.')
+        return result.path
 
     @property
     def proxy_domain(self):

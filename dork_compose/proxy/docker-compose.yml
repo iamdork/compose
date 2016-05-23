@@ -6,8 +6,8 @@ services:
     labels:
     - org.iamdork.proxy
     volumes:
-    - /var/run/docker.sock:/tmp/docker.sock:ro
-    - /Users/philipp/.dork/auth:/etc/nginx/htpasswd:ro
+    - ${DOCKER_SOCK}:/tmp/docker.sock:ro
+    - ${DORK_PROXY_AUTH_DIR}:/etc/nginx/htpasswd:ro
     environment:
     - DORK_PROXY_SKIP
     ports:
