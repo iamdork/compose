@@ -34,10 +34,9 @@ class Plugin(dork_compose.plugin.Plugin):
                     info[key] += ' (password protected)'
         return info
 
-
     @property
     def auth_dir(self):
-        return os.path.expanduser(self.env.get('DORK_PROXY_AUTH_DIR', '%s/auth' % self.env.get('DORK_DATA_DIR')))
+        return os.path.expanduser(self.env.get('DORK_PROXY_AUTH_DIR', '%s/auth' % self.datadir))
 
     @property
     def docker_sock(self):

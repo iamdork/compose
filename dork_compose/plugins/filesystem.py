@@ -8,7 +8,7 @@ class Plugin(dork_compose.plugin.Plugin):
 
     @property
     def volumes(self):
-        return os.path.expanduser(self.env.get('DORK_FILESYSTEM_VOLUME_PATH', '%s/volumes' % self.env.get('DORK_DATA_DIR')))
+        return os.path.expanduser(self.env.get('DORK_FILESYSTEM_VOLUME_PATH', '%s/volumes' % self.datadir))
 
     @property
     def volume(self):
@@ -20,7 +20,7 @@ class Plugin(dork_compose.plugin.Plugin):
 
     @property
     def snapshots(self):
-        return os.path.expanduser(self.env.get('DORK_FILESYSTEM_SNAPSHOT_PATH', '%s/snapshots' % self.env.get('DORK_DATA_DIR')))
+        return os.path.expanduser(self.env.get('DORK_FILESYSTEM_SNAPSHOT_PATH', '%s/snapshots' % self.datadir))
 
     @property
     def snapshot(self):

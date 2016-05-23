@@ -77,6 +77,10 @@ class Plugin:
         return self.env['DORK_SOURCE']
 
     @property
+    def datadir(self):
+        return os.path.expanduser(self.env['DORK_DATA_DIR'])
+
+    @property
     def project(self):
         return self.env['DORK_PROJECT']
 
