@@ -8,7 +8,7 @@ https://github.com/pypa/sampleproject
 # Always prefer setuptools over distutils
 from setuptools import setup, find_packages
 
-version = '0.1.9'
+version = '0.1.10'
 
 setup(
     name='dork-compose',
@@ -18,7 +18,7 @@ setup(
     # https://packaging.python.org/en/latest/single_source_version.html
     version=version,
 
-    description='Docker and ansible based development containers.',
+    description='docker-compose with magicks.',
 
     # The project's main homepage.
     url='https://github.com/iamdork/dork',
