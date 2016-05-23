@@ -2,6 +2,7 @@ import os
 import contextlib
 from helpers import notdefault, tru
 import logging
+import pkg_resources
 
 
 @contextlib.contextmanager
@@ -20,7 +21,7 @@ def load(plugins):
         if '=' in plugin:
             (plugin, f) = plugin.split('=')
         else:
-            f = "%s/plugins/%s.py" % (os.path.dirname(__file__), plugin)
+            f = "%s/%s.py" % (pkg_resources.resource_filename('dork_compose', 'plugins'), plugin)
 
         f = os.path.expanduser(f)
         if os.path.isfile(f):
