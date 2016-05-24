@@ -18,29 +18,25 @@ class Plugin(dork_compose.plugin.Plugin):
             os.path.expanduser(self.env.get('DORK_LIBRARY', '')),
         ]))
 
-    @property
-    def source(self):
-        return self.env.get('DORK_LIBRARY_SOURCE', 'source')
-
     def info(self, project):
         return {
             'Library': self.library
         }
 
     def building_service(self, service):
-        # Assemble the full build context for our service.
-        dirname = tempfile.mktemp()
-        self.tempdirs.append(dirname)
-        shutil.copytree(service.options['build']['context'], dirname, symlinks=True)
-        # TODO: find a faster solution
-        # Perhaps there is a better option than a full source directory copy?
-        # Docker does not allow symlinks
-        # - hardlinks?
-        # - rsync?
-        # - mounting if possible?
-        shutil.copytree(self.basedir, '%s/%s' % (dirname, self.source), symlinks=True)
-        service.options['build']['context'] = dirname
-        dork_compose.plugin.Plugin.building_service(self, service)
+        if 'environment' in service.options and 'DORK_SOURCE_PATH' in service.options['environment']:
+            # Assemble the full build context for our service.
+            dirname = tempfile.mktemp()
+            self.tempdirs.append(dirname)
+            shutil.copytree(service.options['build']['context'], dirname, symlinks=True, ignore=lambda *args, **kwargs: ['.git'])
+            # TODO: find a faster solution
+            # Perhaps there is a better option than a full source directory copy?
+            # Docker does not allow symlinks
+            # - hardlinks?
+            # - rsync?
+            # - mounting if possible?
+            shutil.copytree(self.basedir, '%s%s' % (dirname, service.options['environment']['DORK_SOURCE_PATH']), symlinks=True, ignore=lambda *args, **kwargs: ['.git'])
+            service.options['build']['context'] = dirname
 
     def cleanup(self):
         for d in self.tempdirs:
