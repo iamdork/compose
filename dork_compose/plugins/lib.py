@@ -31,14 +31,14 @@ class Plugin(dork_compose.plugin.Plugin):
         # Assemble the full build context for our service.
         dirname = tempfile.mktemp()
         self.tempdirs.append(dirname)
-        shutil.copytree(service.options['build']['context'], dirname)
+        shutil.copytree(service.options['build']['context'], dirname, symlinks=True)
         # TODO: find a faster solution
         # Perhaps there is a better option than a full source directory copy?
         # Docker does not allow symlinks
         # - hardlinks?
         # - rsync?
         # - mounting if possible?
-        shutil.copytree(self.basedir, '%s/%s' % (dirname, self.source))
+        shutil.copytree(self.basedir, '%s/%s' % (dirname, self.source), symlinks=True)
         service.options['build']['context'] = dirname
         dork_compose.plugin.Plugin.building_service(self, service)
 

@@ -57,7 +57,7 @@ class Plugin(dork_compose.plugin.Plugin):
             # Remove the current snapshot, if one exists.
             shutil.rmtree(snapshot, ignore_errors=True)
             # Copy the volumes directory to the
-            shutil.copytree(self.volume, snapshot)
+            shutil.copytree(self.volume, snapshot, symlinks=True)
 
     def snapshot_load(self, snapshots=()):
         options = list(set(self.snapshot_ls()) & set(snapshots))
@@ -67,7 +67,7 @@ class Plugin(dork_compose.plugin.Plugin):
             # Remove the current volume directory.
             shutil.rmtree(self.volume, ignore_errors=True)
             # Copy the snapshot as new volume.
-            shutil.copytree(snapshot, self.volume)
+            shutil.copytree(snapshot, self.volume, symlinks=True)
             return name
         return None
 
