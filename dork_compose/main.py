@@ -85,8 +85,10 @@ def run():
                     names = filter(tru, [p.snapshot_autosave() for p in plugins])
 
                 # Invoke plugin save hooks with collected names.
+                self.project.stop()
                 for plugin in plugins:
                     plugin.snapshot_save(names)
+                self.project.start()
 
             def _snapshot_load(self, names=()):
                 # If the names list is empty, collect most appropriate snapshots
