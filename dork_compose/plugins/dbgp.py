@@ -11,4 +11,4 @@ class Plugin(dork_compose.plugin.Plugin):
 
     @property
     def auxiliary_project(self):
-        return pkg_resources.resource_filename('dork_compose', 'dbgp')
+        return pkg_resources.resource_filename('dork_compose', 'auxiliary/dbgp')

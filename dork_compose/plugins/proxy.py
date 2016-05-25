@@ -21,7 +21,7 @@ class Plugin(dork_compose.plugin.Plugin):
 
     @property
     def auxiliary_project(self):
-        return pkg_resources.resource_filename('dork_compose', 'proxy')
+        return pkg_resources.resource_filename('dork_compose', 'auxiliary/proxy')
 
     def service_domain(self, service=None):
         return '--'.join(filter(tru, [
