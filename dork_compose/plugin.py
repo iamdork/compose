@@ -1,5 +1,12 @@
 import os
+import sys
 import contextlib
+
+from compose.cli.command import get_client
+from compose.cli.docker_client import docker_client
+from compose.config import config
+from compose.const import API_VERSIONS
+from compose.project import Project
 from helpers import notdefault, tru
 import logging
 import pkg_resources
@@ -25,11 +32,15 @@ def load(plugins):
             f = "%s/%s.py" % (pkg_resources.resource_filename('dork_compose', 'plugins'), plugin)
 
         f = os.path.expanduser(f)
-        if os.path.isfile(f):
+
+        try:
             execfile(os.path.expanduser(f), local)
-        instance = local['Plugin'](environment.copy())
-        instances.append(instance)
-        environment.update(instance.environment())
+            instances.append(local['Plugin'](environment.copy(), plugin))
+            environment.update(instances[-1].environment())
+        except Exception as ex:
+            logger = logging.getLogger('dork')
+            logger.debug('Could not load plugin %s: %s' % (plugin, ex))
+            pass
 
     instances = filter(lambda i: i.initialize(), instances)
 
@@ -53,13 +64,14 @@ def load(plugins):
         instance.cleanup()
 
 
-class Plugin:
+class Plugin(object):
     """
     Interface definition for plugins that can interact with the docker-compose
     process.
     """
 
-    def __init__(self, env):
+    def __init__(self, env, name):
+        self.name = name
         self.env = env.copy()
         self.log = logging.getLogger(__name__)
 
@@ -100,52 +112,19 @@ class Plugin:
         """
         pass
 
-    def initializing_volumes(self, volumes):
-        """
-        Act before volumes were initialized by docker-compose.
-
-        :type volumes: list[compose.volume.Volume]
-        """
+    def building(self, service):
         pass
 
-    def removed_volumes(self, volumes):
-        """
-        Act after volumes are removed by docker-compose.
-
-        :type volumes: list[compose.volume.Volume]
-        """
+    def initializing(self, project, service_names=None):
         pass
 
-    def initialized_networks(self, networks):
-        """
-        Act after networks are initialized by docker-compose.
-
-        :type volumes: list[compose.network.Network]
-        """
+    def initialized(self, project, containers=None):
         pass
 
-    def removing_networks(self, networks):
-        """
-        Act before networks are removed by docker-compose.
-
-        :type volumes: list[compose.network.Network]
-        """
+    def removing(self, project, include_volumes=False):
         pass
 
-    def building_service(self, service):
-        """
-        Alter a service before it will be built.
-        :param service:
-        :return:
-        """
-        pass
-
-    def starting_service(self, service):
-        """
-        Alter a service before it will be started.
-        :param service:
-        :return:
-        """
+    def removed(self, project, include_volumes=False):
         pass
 
     def snapshot_save(self, snapshots=()):
@@ -213,3 +192,74 @@ class Plugin:
         """
         return []
 
+    @property
+    def auxiliary_project(self):
+        return None
+
+    @property
+    def auxiliary_project_name(self):
+        return 'dork_aux_%s' % self.name
+
+    def attach_auxiliary_project(self, project):
+        if not self.auxiliary_project:
+            return
+
+        networks = project.networks.networks
+
+        if 'default' in networks:
+            current_networks = self.get_auxiliary_networks(self.auxiliary_project_name)
+            if networks['default'].full_name not in current_networks:
+                current_networks.append(networks['default'].full_name)
+            aux = self.get_auxiliary_project(current_networks)
+            aux.up(detached=True, remove_orphans=True)
+
+    def detach_auxiliary_project(self, project):
+        if not self.auxiliary_project:
+            return
+        networks = project.networks.networks
+        if 'default' in networks:
+            current_networks = list(set(self.get_auxiliary_networks(self.auxiliary_project_name)) - {networks['default'].full_name})
+            aux = self.get_auxiliary_project(current_networks)
+
+            if current_networks:
+                aux.up(detached=True, remove_orphans=True)
+            else:
+                aux.down(remove_image_type=None, include_volumes=False, remove_orphans=True)
+
+    def get_auxiliary_networks(self, project_name):
+        result = []
+
+        client = docker_client(self.environment())
+        containers = client.containers(all=True, filters={
+            'label': [
+                'org.iamdork.auxiliary',
+                'com.docker.compose.project=%s' % project_name
+            ],
+        })
+
+        for container in containers:
+            if 'NetworkSettings' in container and 'Networks' in container['NetworkSettings']:
+                for network in container['NetworkSettings']['Networks']:
+                    result.append(network)
+        return result
+
+    def get_auxiliary_project(self, networks):
+        config_details = config.find(self.auxiliary_project, [], self.environment())
+        project_name = self.auxiliary_project_name
+        config_data = config.load(config_details)
+
+        for network in networks:
+            config_data.networks[network] = {
+                'external': {'name': network},
+                'external_name': network
+            }
+
+            for key, service in enumerate(config_data.services):
+                if 'labels' in service and 'org.iamdork.auxiliary' in service['labels']:
+                    if 'networks' not in config_data.services[key]:
+                        config_data.services[key]['networks'] = {}
+                    config_data.services[key]['networks'][network] = None
+
+        client = get_client(self.environment(), version=API_VERSIONS[config_data.version])
+
+        return Project.from_config(project_name, config_data, client)

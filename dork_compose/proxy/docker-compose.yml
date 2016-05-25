@@ -4,12 +4,11 @@ services:
   front:
     image: jwilder/nginx-proxy:0.3.6
     labels:
+    - org.iamdork.auxiliary
     - org.iamdork.proxy
     volumes:
     - ${DOCKER_SOCK}:/tmp/docker.sock:ro
     - ${DORK_PROXY_AUTH_DIR}:/etc/nginx/htpasswd:ro
-    environment:
-    - DORK_PROXY_SKIP
     ports:
     - "80:80"
     - "443:443"

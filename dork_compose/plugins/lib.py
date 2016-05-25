@@ -5,11 +5,12 @@ import tempfile
 
 
 class Plugin(dork_compose.plugin.Plugin):
-    def initialize(self):
+
+    def __init__(self, env, name):
+        dork_compose.plugin.Plugin.__init__(self, env, name)
         self.tempdirs = []
         if self.library:
             os.chdir(os.path.expanduser(self.library))
-            return True
 
     @property
     def library(self):
@@ -23,7 +24,7 @@ class Plugin(dork_compose.plugin.Plugin):
             'Library': self.library
         }
 
-    def building_service(self, service):
+    def building(self, service):
         if 'environment' in service.options and 'DORK_SOURCE_PATH' in service.options['environment']:
             # Assemble the full build context for our service.
             dirname = tempfile.mktemp()

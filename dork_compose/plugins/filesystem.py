@@ -6,6 +6,11 @@ from compose.config.config import VolumeSpec
 
 class Plugin(dork_compose.plugin.Plugin):
 
+    def __init__(self, env, name):
+        dork_compose.plugin.Plugin.__init__(self, env, name)
+        self.__mkdir(self.snapshots)
+        self.__mkdir(self.volumes)
+
     @property
     def volumes(self):
         return os.path.expanduser(self.env.get('DORK_FILESYSTEM_VOLUME_PATH', '%s/volumes' % self.datadir))
@@ -44,12 +49,9 @@ class Plugin(dork_compose.plugin.Plugin):
         for key in config.volumes.keys():
             del config.volumes[key]
 
-    def initializing_volumes(self, volumes):
-        self.__mkdir(self.snapshots)
-        self.__mkdir(self.volumes)
-
-    def removed_volumes(self, volumes):
-        shutil.rmtree(self.volumes, ignore_errors=True)
+    def removed(self, project, include_volumes=None):
+        if include_volumes:
+            shutil.rmtree(self.volumes, ignore_errors=True)
 
     def snapshot_save(self, snapshots=()):
         for name in snapshots:
