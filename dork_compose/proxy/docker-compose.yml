@@ -2,7 +2,7 @@ version: '2'
 
 services:
   front:
-    image: jwilder/nginx-proxy
+    image: jwilder/nginx-proxy:0.3.6
     labels:
     - org.iamdork.proxy
     volumes:
