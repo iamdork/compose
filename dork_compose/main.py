@@ -23,12 +23,14 @@ DEFAULT_PLUGINS = 'env:lib:multi:git:filesystem:proxy:dbgp'
 def run():
     with plugin.load(os.getenv('DORK_PLUGINS', DEFAULT_PLUGINS)) as plugins:
 
-        # Replace compose TopLevelCommand with custom derivation.
+        # Replace compose TopLevelCommand with custom derivation with additional
+        # commands.
         compose.cli.main.TopLevelCommand = DorkTopLevelCommand
 
-        # Inject custom get_dork_project fu
+        # Inject custom get_dork_project to replace instances with DorkProjects.
         compose.cli.command.get_project = partial(get_dork_project, plugins)
 
+        # Run the original dork-compose main function.
         compose.cli.main.main()
 
 

@@ -4,9 +4,8 @@
 `dork-compose` is a drop in replacement for the [docker-compose] command line tool, adding some convenience features for running multiple compose projects on the same host.
 
 - Volume snapshots with automatic versioning.
-- HTTP proxy management.
-- Separation of Docker setup (`Dockerfile` and `docker-compose.yml`)
-  from application source code.
+- Separation of Docker setup (`Dockerfile` and `docker-compose.yml`) from application source code.
+- Automatic launch of and connection to auxiliary services, like [nginx](https://github.com/jwilder/nginx-proxy)- or [XDebug](https://xdebug.org/docs-dbgp.php#just-in-time-debugging-and-debugger-proxies) proxies.
 
 ### Example use cases:
 - Your local development workstation, hosting multiple different projects built on the same framework, and therefore requiring similar infrastructure and setup steps.
@@ -15,8 +14,7 @@
 
 
 ## Installation
-`dork-compose` uses the same installation procedures as
-[docker-compose].
+`dork-compose` uses the same installation procedures as [docker-compose].
 Either using pip:
 ```
 $ pip install dork-compose
@@ -42,25 +40,19 @@ env:lib:multi:git:filesystem:proxy
 That's the default workstation setup. Plugins are executed from left to right. If two plugins to the same, the right one wins.
 Let's run through this example:
 
-**env**
-:   Searches for [.env files][env] in the current and all parent directories and merges their content into the environment.
+- **env:** Searches for [.env files][env] in the current and all parent directories and merges their content into the environment.
 
-**lib**
-:   If there is a `DORK_LIBRARY` environment variable that contains a valid directory, `dork-compose` will assume the `docker-compose.yml` is there.
+- **lib:** If there is a `DORK_LIBRARY` environment variable that contains a valid directory, `dork-compose` will assume the `docker-compose.yml` is there. The current application sources will be added to the `Dockerfile` build context automatically.
 
-**multi**
-:   Multiple different projects. The project name will be the name of the containing directory. It is used to prefix snapshots and build the domain.
+- **multi:** Multiple different projects. The project name will be the name of the containing directory. It is used to prefix snapshots and build the domain.
 
-**git**
-:   Git repository information is used to handle automatic *save* and *load* of snapshots. Handy for frequent branch switchers.
+- **git:** Git repository information is used to handle automatic *save* and *load* of snapshots. Handy for frequent branch switchers.
 
-**filesystem**
-:   Implements snapshots as plain filesystem copy operations. Not particularly fast or disk space economic, but works out of the box everywhere.
+- **filesystem:** Implements snapshots as plain filesystem copy operations. Not particularly fast or disk space economic, but works out of the box everywhere.
 
-**proxy**
-:   Spins up a proxy service that serves your project at http://project.127.0.0.1.xip.io.
+- **proxy:** Spins up a proxy service that serves your project at http://project.127.0.0.1.xip.io.
 
-There are no configuration files. Plugins can be configured using environment variables, which you define in your shell environment for by using the first **env** plugin. For a complete list of plugins and their options please refer to [Appendix: Plugins][].
+There are no configuration files. Plugins can be configured using environment variables, which you define in your shell environment for by using the **env** plugin. For a complete list of plugins and their options please refer to [Appendix: Plugins][]. For an in-action example of these plugins, please refer to the [drupal-simple](https://github.com/iamdork/examples/tree/master/drupal-simple) in the [examples repository](https://github.com/iamdork/examples).
 
 
 ### Custom plugins
@@ -71,7 +63,7 @@ It's possible to create and load custom plugins. Simply create a Python file wit
 env:lib:multi:git:filesystem:proxy:my_plugin=~/path/to/myplugin.py
 ```
 
-For example plugins have a look at the `plugins` package inside the `dork-compose` source.
+For example plugins have a look at the `plugins` directory inside the `dork-compose` source.
 
 ## Snapshots
 
@@ -80,7 +72,7 @@ For an example of how to work with snapshots, please refer to the *drupal-simple
 
 ### Projects & Instances
 
-Containers are organized in  *projects* and *instances*. `dork-compose` assumes that instances of the same project are compatible. Aside from building the proxy domain, the major purpose is to restrict snapshots to be used by instances of the same project only.
+Snapshots are organized in  *projects* and *instances*. `dork-compose` assumes that instances of the same project are compatible. Aside from building the proxy domain, the major purpose is to restrict snapshots to be used by instances of the same project only.
 
 The current *project* and *instance* is determined by plugins (like *multi* in the default setup) or by the `DORK_PROJECT` and `DORK_INSTANCE` environment variables.
 
@@ -90,5 +82,6 @@ If the snapshot identifier is omitted from the `snapshot save` and `snapshot loa
 
 ## Appendix: Plugins
 
+*TODO: explain all builtin plugins.*
 [docker-compose]: https://docs.docker.com/compose/
 [env]: https://docs.docker.com/compose/compose-file/#env-file
