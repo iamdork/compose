@@ -2,7 +2,7 @@ version: '2'
 
 services:
   front:
-    image: jwilder/nginx-proxy:0.3.6
+    image: jwilder/nginx-proxy
     labels:
     - org.iamdork.auxiliary
     - org.iamdork.proxy

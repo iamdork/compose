@@ -1,9 +1,12 @@
+import re
+
 import os
 from compose.cli.command import get_project
 import compose.cli.command as cmd
 from compose.cli.main import TopLevelCommand
-from compose.config import config
-from compose.const import DEFAULT_TIMEOUT, API_VERSIONS
+from compose.config.config import load
+from compose.config.environment import Environment
+from compose.const import DEFAULT_TIMEOUT
 from compose.project import Project
 from compose.service import ConvergenceStrategy, BuildAction, Service
 from dork_compose.helpers import tru
@@ -12,7 +15,7 @@ from functools import partial
 
 
 def dork_config_load(plugins, config_details):
-    config_data = config.load(config_details)
+    config_data = load(config_details)
     for plugin in plugins:
         plugin.preprocess_config(config_data)
     return config_data
@@ -29,6 +32,24 @@ def get_dork_project(plugins, project_dir, config_path=None, project_name=None,
         project.name = os.environ['COMPOSE_PROJECT_NAME']
 
     return DorkProject.from_project(project, plugins)
+
+
+def get_dork_project_name(working_dir, project_name=None, environment=None):
+    def normalize_name(name):
+        # Full copy because compose strips dashes from project names.
+        return re.sub(r'[^a-z0-9\-]', '', name.lower())
+
+    if not environment:
+        environment = Environment.from_env_file(working_dir)
+    project_name = project_name or environment.get('COMPOSE_PROJECT_NAME')
+    if project_name:
+        return normalize_name(project_name)
+
+    project = os.path.basename(os.path.abspath(working_dir))
+    if project:
+        return normalize_name(project)
+
+    return 'default'
 
 
 class DorkTopLevelCommand(TopLevelCommand):
@@ -108,8 +129,6 @@ class DorkProject(Project, Pluggable):
 
     @classmethod
     def from_config(cls, name, config_data, client, plugins=()):
-        for plugin in plugins:
-            plugin.preprocess_config(config_data)
         project = super(DorkProject, cls).from_config(name, config_data, client)
         project.set_plugins(plugins)
         return project

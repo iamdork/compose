@@ -1,5 +1,6 @@
 import dork_compose.plugin
 from functools import partial
+import os
 
 
 def __filter(blacklist=(), segment=''):
@@ -25,14 +26,14 @@ def segments(root, path, blacklist):
 
 class Plugin(dork_compose.plugin.Plugin):
     def environment(self):
-        root = self.env.get('DORK_TREE_ROOT', '/var/source')
+        root = os.path.expanduser(self.env.get('DORK_TREE_ROOT', '/var/source'))
         blacklist = self.env.get('DORK_TREE_BLACKLIST', 'feature;hotfix;release')
-        path = segments(root, self.basedir, blacklist.split(';'))
+        path = map(lambda s: s.lower(), segments(root, self.basedir, blacklist.split(';')))
         return {
             'DORK_TREE_ROOT': root,
             'DORK_TREE_BLACKLIST': blacklist,
             'DORK_PROJECT': path[0],
-            'DORK_INSTANCE': '/'.join(path[1:])
+            'DORK_INSTANCE': '--'.join(path[1:])
         }
 
     def info(self, project):
