@@ -34,13 +34,11 @@ Everything `dork-compose` does additionally to `docker-compose` is implemented u
 By default the `DORK_PLUGINS` variable looks like this:
 
 ```
-env:lib:multi:git:filesystem:proxy
+lib:multi:git:filesystem:proxy
 ```
 
 That's the default workstation setup. Plugins are executed from left to right. If two plugins to the same, the right one wins.
 Let's run through this example:
-
-- **env:** Searches for [.env files][env] in the current and all parent directories and merges their content into the environment.
 
 - **lib:** If there is a `DORK_LIBRARY` environment variable that contains a valid directory, `dork-compose` will assume the `docker-compose.yml` is there. The current application sources will be added to the `Dockerfile` build context automatically.
 
