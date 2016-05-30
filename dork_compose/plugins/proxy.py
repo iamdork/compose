@@ -119,4 +119,3 @@ class Plugin(dork_compose.plugin.Plugin):
                         f.writelines(lines)
                 elif os.path.exists(authfile):
                     os.remove(authfile)
-                self.reload_proxy()
