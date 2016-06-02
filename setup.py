@@ -8,7 +8,7 @@ https://github.com/pypa/sampleproject
 # Always prefer setuptools over distutils
 from setuptools import setup, find_packages
 
-version = '0.1.12'
+version = '0.1.13'
 
 setup(
     name='dork-compose',
@@ -58,6 +58,7 @@ setup(
     # You can just specify the packages manually here if your project is
     # simple. Or you can use find_packages().
     packages=find_packages(exclude=['contrib', 'docs', 'tests*']),
+    package_data={'dork_compose': ['plugins/*.py', 'auxiliary/proxy/docker-compose.yml']},
 
     # List run-time dependencies here.  These will be installed by pip when
     # your project is installed. For an analysis of "install_requires" vs pip's
