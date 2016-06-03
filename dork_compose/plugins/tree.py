@@ -32,8 +32,8 @@ class Plugin(dork_compose.plugin.Plugin):
         return {
             'DORK_TREE_ROOT': root,
             'DORK_TREE_BLACKLIST': blacklist,
-            'DORK_PROJECT': path[0],
-            'DORK_INSTANCE': '--'.join(path[1:])
+            'DORK_PROJECT': path[0] if path else 'default',
+            'DORK_INSTANCE': '--'.join(path[1:] if path else ['default'])
         }
 
     def info(self, project):

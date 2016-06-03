@@ -2,6 +2,7 @@ import dork_compose.plugin
 import os
 import shutil
 import tempfile
+from compose.config.environment import env_vars_from_file
 
 
 class Plugin(dork_compose.plugin.Plugin):
@@ -10,7 +11,7 @@ class Plugin(dork_compose.plugin.Plugin):
         dork_compose.plugin.Plugin.__init__(self, env, name)
         self.tempdirs = []
         if self.library:
-            os.chdir(os.path.expanduser(self.library))
+            os.chdir(self.library)
 
     @property
     def library(self):
@@ -18,6 +19,13 @@ class Plugin(dork_compose.plugin.Plugin):
             os.path.expanduser(self.env.get('DORK_LIBRARY_PATH', '')),
             os.path.expanduser(self.env.get('DORK_LIBRARY', '')),
         ]))
+
+    def environment(self):
+        filename = '%s/.env' % self.library
+        if os.path.isfile(filename):
+            for key, value in env_vars_from_file(filename).iteritems():
+                self.env[key] = self.env.get(key, value)
+        return self.env
 
     def info(self, project):
         return {
