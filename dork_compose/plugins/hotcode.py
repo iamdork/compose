@@ -13,6 +13,8 @@ class Plugin(dork_compose.plugin.Plugin):
                 src = self.env['DORK_SOURCE']
                 dst = service['environment']['DORK_SOURCE_ROOT']
                 for path in self.paths:
+                    if 'volumes' not in service:
+                        service['volumes'] = []
                     service['volumes'].append(VolumeSpec.parse('%s/%s:%s/%s' % (
                         src, path, dst, path
                     )))
