@@ -82,7 +82,7 @@ class Plugin(dork_compose.plugin.Plugin):
                             if external == '443':
                                 service['environment']['VIRTUAL_PROTO'] = 'https'
                             service['environment']['VIRTUAL_PORT'] = int(internal)
-                            service['ports'] = []
+                            del service['ports'][index]
 
     def collect_auth_files(self):
         files = {}
