@@ -42,8 +42,6 @@ def load(plugins):
             logger.debug('Could not load plugin %s: %s' % (plugin, ex))
             pass
 
-    instances = filter(lambda i: i.initialize(), instances)
-
     # If there is no explicit project name in the environment, set
     # [project]--[instance]
     if 'COMPOSE_PROJECT_NAME' not in environment:

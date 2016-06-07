@@ -9,6 +9,7 @@ services:
     volumes:
     - ${DOCKER_SOCK}:/tmp/docker.sock:ro
     - ${DORK_PROXY_AUTH_DIR}:/etc/nginx/htpasswd:ro
+    - ${DORK_PROXY_CERTS_DIR}:/etc/nginx/certs:ro
     ports:
     - "80:80"
     - "443:443"
