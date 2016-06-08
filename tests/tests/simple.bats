@@ -22,7 +22,7 @@ export DORK_LIBRARY_PATH="$(pwd)/lib"
   sleep 1
 
   # Test if the container is accessible.
-  curl http://simple.127.0.0.1.xip.io | grep '<h1>Testpage.</h1>'
+  curl http://simple.127.0.0.1.xip.io | grep '<h1>Testpage that is not there.</h1>'
 
   dork-compose down
 
