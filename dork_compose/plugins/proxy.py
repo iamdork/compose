@@ -48,7 +48,7 @@ class Plugin(dork_compose.plugin.Plugin):
 
     @property
     def certs_dir(self):
-        return os.path.expanduser(self.env.get('DORK_PROXY_AUTH_DIR', '%s/certs' % self.datadir))
+        return os.path.expanduser(self.env.get('DORK_PROXY_CERTS_DIR', '%s/certs' % self.datadir))
 
     @property
     def docker_sock(self):
