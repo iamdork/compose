@@ -1,0 +1,15 @@
+sudo: required
+
+language: python
+python:
+  - "2.7"
+
+services:
+  - docker
+
+before_install:
+  - sudo apt-get -qq update
+  - sudo apt-get install -y git bats
+
+install: "pip install -r requirements.txt"
+script: bats ./tests/tests
