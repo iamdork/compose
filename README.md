@@ -1,4 +1,5 @@
 # Dork Compose
+![Build Status](https://travis-ci.org/iamdork/compose.svg?branch=master)
 
 ## What is this?
 `dork-compose` is a drop in replacement for the [docker-compose] command line tool, adding some convenience features for running multiple compose projects on the same host.
