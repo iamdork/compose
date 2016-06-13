@@ -198,69 +198,52 @@ class Plugin(object):
     def auxiliary_project_name(self):
         return 'dork_aux_%s' % self.name
 
-    def attach_auxiliary_project(self, project):
+    def attach_auxiliary_project(self, network):
         if not self.auxiliary_project:
             return
 
-        networks = project.networks.networks
-
-        current_networks = []
-        for name, network in networks.iteritems():
-            current_networks.extend(self.get_auxiliary_networks(self.auxiliary_project_name))
-            if network.full_name not in current_networks:
-                current_networks.append(network.full_name)
-
-        aux = self.get_auxiliary_project(current_networks)
+        aux = self.get_auxiliary_project()
         aux.up(detached=True, remove_orphans=True)
 
-    def detach_auxiliary_project(self, project):
-        if not self.auxiliary_project:
-            return
-        networks = project.networks.networks
-        current_networks = []
-        for name, network in networks.iteritems():
-            current_networks.extend(list(set(self.get_auxiliary_networks(self.auxiliary_project_name)) - {network.full_name}))
-
-        aux = self.get_auxiliary_project(current_networks)
-
-        if current_networks:
-            aux.up(detached=True, remove_orphans=True)
-        else:
-            aux.down(remove_image_type=None, include_volumes=False, remove_orphans=True)
-
-    def get_auxiliary_networks(self, project_name):
-        result = []
-
         client = docker_client(self.environment())
+
         containers = client.containers(filters={
             'label': [
                 'org.iamdork.auxiliary',
-                'com.docker.compose.project=%s' % project_name
+                'com.docker.compose.project=%s' % self.auxiliary_project_name
             ],
         })
 
         for container in containers:
-            if 'NetworkSettings' in container and 'Networks' in container['NetworkSettings']:
-                for network in container['NetworkSettings']['Networks']:
-                    result.append(network)
-        return result
+            if network not in container['NetworkSettings']['Networks']:
+                client.connect_container_to_network(container, network)
 
-    def get_auxiliary_project(self, networks):
+    def detach_auxiliary_project(self, network):
+        if not self.auxiliary_project:
+            return
+
+        aux = self.get_auxiliary_project()
+        aux.up(detached=True, remove_orphans=True)
+
+        client = docker_client(self.environment())
+
+        containers = client.containers(filters={
+            'label': [
+                'org.iamdork.auxiliary',
+                'com.docker.compose.project=%s' % self.auxiliary_project_name
+            ],
+        })
+
+        for container in containers:
+            if network in container['NetworkSettings']['Networks']:
+                client.disconnect_container_from_network(container, network)
+                if (len(container['NetworkSettings']['Networks']) - 1) == len(aux.networks.networks):
+                    aux.down(remove_image_type=None, include_volumes=False, remove_orphans=True)
+
+    def get_auxiliary_project(self):
         config_details = config.find(self.auxiliary_project, [], self.environment())
         project_name = self.auxiliary_project_name
         config_data = dork_config_load([], config_details)
-
-        for network in networks:
-            config_data.networks[network] = {
-                'external': {'name': network},
-                'external_name': network
-            }
-
-            for key, service in enumerate(config_data.services):
-                if 'labels' in service and 'org.iamdork.auxiliary' in service['labels']:
-                    if 'networks' not in config_data.services[key]:
-                        config_data.services[key]['networks'] = {}
-                    config_data.services[key]['networks'][network] = None
 
         client = get_client(self.environment(), version=API_VERSIONS[config_data.version])
 

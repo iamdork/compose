@@ -7,7 +7,7 @@ from compose.cli.main import TopLevelCommand
 from compose.config.config import load
 from compose.config.environment import Environment
 from compose.const import DEFAULT_TIMEOUT
-from compose.project import Project
+from compose.project import Project, ProjectNetworks
 from compose.service import ConvergenceStrategy, BuildAction, Service
 from dork_compose.helpers import tru
 
@@ -119,18 +119,37 @@ class DorkService(Service, Pluggable):
         return super(DorkService, self).build(no_cache, pull, force_rm)
 
 
+class DorkNetworks(ProjectNetworks, Pluggable):
+    def initialize(self):
+        super(DorkNetworks, self).initialize()
+
+        for key, network in self.networks.iteritems():
+            for plugin in self.plugins:
+                plugin.attach_auxiliary_project(network.full_name)
+
+    def remove(self):
+        for key, network in self.networks.iteritems():
+            for plugin in self.plugins:
+                plugin.detach_auxiliary_project(network.full_name)
+
+        super(DorkNetworks, self).remove()
+
+
 class DorkProject(Project, Pluggable):
 
     @classmethod
     def from_project(cls, project, plugins=()):
         project.__class__ = cls
         project.set_plugins(plugins)
+        project.networks.__class__ = DorkNetworks
+        project.networks.set_plugins(plugins)
         return project
 
     @classmethod
     def from_config(cls, name, config_data, client, plugins=()):
         project = super(DorkProject, cls).from_config(name, config_data, client)
         project.set_plugins(plugins)
+        project.networks.set_plugins(plugins)
         return project
 
     def get_services(self, service_names=None, include_deps=False):
@@ -146,17 +165,11 @@ class DorkProject(Project, Pluggable):
         for plugin in self.plugins:
             plugin.initialized(self, containers)
 
-        for plugin in self.plugins:
-            plugin.attach_auxiliary_project(self)
-
         return containers
 
     def down(self, remove_image_type, include_volumes, remove_orphans=False):
         for plugin in self.plugins:
             plugin.removing(self, include_volumes)
-
-        for plugin in self.plugins:
-            plugin.detach_auxiliary_project(self)
 
         super(DorkProject, self).down(remove_image_type, include_volumes, remove_orphans)
 
