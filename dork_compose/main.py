@@ -9,7 +9,7 @@ import compose.project
 import compose.cli.command
 import compose.cli.main
 
-from injections import DorkTopLevelCommand, get_dork_project, get_dork_project_name, dork_config_load
+from injections import DorkTopLevelCommand, get_dork_project, get_dork_project_name, dork_config_load, DorkNetworks
 from compose.config.environment import env_vars_from_file
 
 # Default plugins:
