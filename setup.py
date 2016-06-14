@@ -8,7 +8,7 @@ https://github.com/pypa/sampleproject
 # Always prefer setuptools over distutils
 from setuptools import setup, find_packages
 
-version = '0.1.17'
+version = '0.1.18'
 
 setup(
     name='dork-compose',
