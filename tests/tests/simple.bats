@@ -1,13 +1,12 @@
 #!/usr/bin/env bats
 
-SOURCES="$(pwd)/sources"
-export DORK_LIBRARY_PATH="$(pwd)/lib"
+load common
 
 @test "Simple project info" {
   cd sources/simple
 
   # Check if the url is available in the info.
-  dork-compose info | grep 'http://simple.127.0.0.1.xip.io'
+  dork-compose info | grep 'http://simple.dork'
 }
 
 @test "Simple project accessible" {
@@ -22,7 +21,8 @@ export DORK_LIBRARY_PATH="$(pwd)/lib"
   sleep 1
 
   # Test if the container is accessible.
-  curl http://simple.127.0.0.1.xip.io | grep '<h1>Testpage.</h1>'
+  #curl --resolve a.dork:80:127.0.0.1 http://simple.dork | grep '<h1>Testpage.</h1>'
+  get simple.dork | grep '<h1>Testpage.</h1>'
 
   dork-compose down
 
