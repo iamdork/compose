@@ -1,0 +1,8 @@
+version: '2'
+services:
+  http:
+    build: ./php
+    environment:
+      ENVIRONMENT_TEST: ${ENVIRONMENT_TEST}
+    ports:
+    - 80:80

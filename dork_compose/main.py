@@ -23,18 +23,19 @@ DEFAULT_PLUGINS = 'lib:hotcode:multi:git:filesystem:proxy'
 def update_environment():
     # Collect separate environment dict from .env files in
     # current and parent directories.
-    env = {}
     path = filter(len, os.path.abspath(os.path.curdir).split('/'))
     current = ''
     if 'DORK_PLUGINS' not in os.environ:
         os.environ['DORK_PLUGINS'] = DEFAULT_PLUGINS
+    env = {}
+    env.update(os.environ)
 
     while len(path):
         current = current + '/' + path.pop(0)
         envfile = '%s/.env' % current
         if os.path.isfile(envfile):
-            env.update(env_vars_from_file(envfile))
-
+            for key, value in env_vars_from_file(envfile).iteritems():
+                os.environ[key] = os.path.expandvars(value)
     os.environ.update(env)
 
 

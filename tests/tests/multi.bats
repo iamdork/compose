@@ -1,7 +1,6 @@
 #!/usr/bin/env bats
 
-SOURCES="$(pwd)/sources"
-export DORK_LIBRARY_PATH="$(pwd)/lib"
+load common
 
 
 @test "Start multiple projects" {
@@ -18,9 +17,9 @@ export DORK_LIBRARY_PATH="$(pwd)/lib"
   sleep 1
 
   # Test if the container is accessible.
-  curl http://one.127.0.0.1.xip.io | grep '<h1>Testpage 1.</h1>'
-  curl http://two.127.0.0.1.xip.io | grep '<h1>Testpage 2.</h1>'
-  curl http://three.127.0.0.1.xip.io | grep '<h1>Testpage 3.</h1>'
+  get one.dork | grep '<h1>Testpage 1.</h1>'
+  get two.dork | grep '<h1>Testpage 2.</h1>'
+  get three.dork | grep '<h1>Testpage 3.</h1>'
 
   cd $SOURCES/multi/one && dork-compose down
   cd $SOURCES/multi/two && dork-compose down
@@ -48,9 +47,9 @@ export DORK_LIBRARY_PATH="$(pwd)/lib"
   sleep 1
 
   # Test if the container is accessible.
-  curl http://one.127.0.0.1.xip.io | grep '<h1>Testpage 1.</h1>'
-  curl http://two.127.0.0.1.xip.io | grep '<h1>Testpage 2.</h1>'
-  curl http://three.127.0.0.1.xip.io | grep '<h1>Testpage 3.</h1>'
+  get one.dork | grep '<h1>Testpage 1.</h1>'
+  get two.dork | grep '<h1>Testpage 2.</h1>'
+  get three.dork | grep '<h1>Testpage 3.</h1>'
 
   (cd $SOURCES/multi/one && dork-compose down) &
   (cd $SOURCES/multi/two && dork-compose down) &
