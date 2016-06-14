@@ -21,7 +21,6 @@ load common
   sleep 1
 
   # Test if the container is accessible.
-  #curl --resolve a.dork:80:127.0.0.1 http://simple.dork | grep '<h1>Testpage.</h1>'
   get simple.dork | grep '<h1>Testpage.</h1>'
 
   dork-compose down

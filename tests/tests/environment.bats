@@ -4,6 +4,7 @@ load common
 
 @test "Environment variable replacement." {
   cd sources/environment/a
+  export WHATISIT="a test"
 
   dork-compose up -d
 
