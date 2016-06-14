@@ -51,7 +51,7 @@ class Plugin(dork_compose.plugin.Plugin):
 
     def removed(self, project, include_volumes=None):
         if include_volumes:
-            shutil.rmtree(self.volumes, ignore_errors=True)
+            shutil.rmtree(self.volume, ignore_errors=True)
 
     def snapshot_save(self, snapshots=()):
         for name in snapshots:
