@@ -3,22 +3,22 @@
 load common
 
 @test "Test tree setup" {
-  cd $SOURCES/tree/a
+  cd $SOURCES/tree/one
   dork-compose up -d
-  cd $SOURCES/tree/b
+  cd $SOURCES/tree/two
   dork-compose up -d
 
   # Sleep to wait for the container to boot.
   sleep 1
 
   # Test if the container is accessible.
-  get tree--a.dork | grep '<h1>Testpage A</h1>'
+  get tree--one.dork index.html | grep '<h1>Testpage 1</h1>'
 
   # Test if the container is accessible.
-  get tree--b.dork | grep '<h1>Testpage B</h1>'
+  get tree--two.dork index.html | grep '<h1>Testpage 2</h1>'
 
-  cd $SOURCES/tree/a
+  cd $SOURCES/tree/one
   dork-compose down
-  cd $SOURCES/tree/b
+  cd $SOURCES/tree/two
   dork-compose down
 }

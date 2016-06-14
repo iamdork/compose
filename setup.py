@@ -67,7 +67,8 @@ setup(
     install_requires=[
         'docker-compose==1.7.1',
         'gitpython',
-        'terminaltables'
+        'terminaltables',
+        'filelock'
     ],
 
     # List additional groups of dependencies here (e.g. development
