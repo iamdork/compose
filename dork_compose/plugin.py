@@ -10,6 +10,7 @@ from compose.project import Project
 from helpers import notdefault, tru
 import logging
 import pkg_resources
+import filelock
 
 
 @contextlib.contextmanager
@@ -203,42 +204,47 @@ class Plugin(object):
             return
 
         aux = self.get_auxiliary_project()
-        aux.up(detached=True, remove_orphans=True)
+        lock = filelock.SoftFileLock(self.auxiliary_project_name)
+        with lock.acquire(60):
+            aux.up(detached=True, remove_orphans=True)
 
-        client = docker_client(self.environment())
+            client = docker_client(self.environment())
 
-        containers = client.containers(filters={
-            'label': [
-                'org.iamdork.auxiliary',
-                'com.docker.compose.project=%s' % self.auxiliary_project_name
-            ],
-        })
+            containers = client.containers(filters={
+                'label': [
+                    'org.iamdork.auxiliary',
+                    'com.docker.compose.project=%s' % self.auxiliary_project_name
+                ],
+            })
 
-        for container in containers:
-            if network not in container['NetworkSettings']['Networks']:
-                client.connect_container_to_network(container, network)
+            for container in containers:
+                if network not in container['NetworkSettings']['Networks']:
+                    client.connect_container_to_network(container, network)
 
     def detach_auxiliary_project(self, network):
         if not self.auxiliary_project:
             return
 
         aux = self.get_auxiliary_project()
-        aux.up(detached=True, remove_orphans=True)
 
-        client = docker_client(self.environment())
+        lock = filelock.SoftFileLock(self.auxiliary_project_name)
+        with lock.acquire(60):
+            aux.up(detached=True, remove_orphans=True)
 
-        containers = client.containers(filters={
-            'label': [
-                'org.iamdork.auxiliary',
-                'com.docker.compose.project=%s' % self.auxiliary_project_name
-            ],
-        })
+            client = docker_client(self.environment())
 
-        for container in containers:
-            if network in container['NetworkSettings']['Networks']:
-                client.disconnect_container_from_network(container, network)
-                if (len(container['NetworkSettings']['Networks']) - 1) == len(aux.networks.networks):
-                    aux.down(remove_image_type=None, include_volumes=False, remove_orphans=True)
+            containers = client.containers(filters={
+                'label': [
+                    'org.iamdork.auxiliary',
+                    'com.docker.compose.project=%s' % self.auxiliary_project_name
+                ],
+            })
+
+            for container in containers:
+                if network in container['NetworkSettings']['Networks']:
+                    client.disconnect_container_from_network(container, network)
+                    if (len(container['NetworkSettings']['Networks']) - 1) == len(aux.networks.networks):
+                        aux.down(remove_image_type=None, include_volumes=False, remove_orphans=True)
 
     def get_auxiliary_project(self):
         config_details = config.find(self.auxiliary_project, [], self.environment())
