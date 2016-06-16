@@ -24,7 +24,7 @@ class Plugin(dork_compose.plugin.Plugin):
         filename = '%s/.env' % self.library
         if os.path.isfile(filename):
             for key, value in env_vars_from_file(filename).iteritems():
-                self.env[key] = self.env.get(key, value)
+                self.env[key] = os.path.expandvars(self.env.get(key, value))
         return self.env
 
     def info(self, project):
@@ -49,4 +49,4 @@ class Plugin(dork_compose.plugin.Plugin):
 
     def cleanup(self):
         for d in self.tempdirs:
-            shutil.rmtree(d)
+            shutil.rmtree(d, ignore_errors=True)
