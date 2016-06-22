@@ -30,6 +30,11 @@ def update_environment():
 
     while len(path):
         current = current + '/' + path.pop(0)
+        envfile = '%s/.dork.env' % current
+        if os.path.isfile(envfile):
+            for key, value in env_vars_from_file(envfile).iteritems():
+                os.environ[key] = os.path.expandvars(value)
+            continue
         envfile = '%s/.env' % current
         if os.path.isfile(envfile):
             for key, value in env_vars_from_file(envfile).iteritems():
