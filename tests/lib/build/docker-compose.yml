@@ -1,0 +1,6 @@
+version: '2'
+services:
+  app:
+    build: ./bash
+    environment:
+      DORK_SOURCE_PATH: /source

@@ -18,6 +18,7 @@ class Plugin(dork_compose.plugin.Plugin):
             'DOCKER_SOCK': self.docker_sock,
             'DORK_PROXY_AUTH_DIR': self.auth_dir,
             'DORK_PROXY_CERTS_DIR': self.certs_dir,
+            'DORK_PROXY_INSTANCE_DOMAIN': self.service_domain()
         }
 
     @property

@@ -3,6 +3,8 @@ version: '2'
 services:
   front:
     image: jwilder/nginx-proxy
+    environment:
+      HTTPS_METHOD: noredirect
     labels:
     - org.iamdork.auxiliary
     - org.iamdork.proxy

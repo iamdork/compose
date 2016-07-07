@@ -152,9 +152,8 @@ class DorkProject(Project, Pluggable):
         project.networks.set_plugins(plugins)
         return project
 
-    def get_services(self, service_names=None, include_deps=False):
-        services = super(DorkProject, self).get_services(service_names, include_deps)
-        return [DorkService.from_service(service, self.plugins) for service in services]
+    def get_service(self, name):
+        return DorkService.from_service(super(DorkProject, self).get_service(name), self.plugins)
 
     def up(self, service_names=None, start_deps=True, strategy=ConvergenceStrategy.changed, do_build=BuildAction.none, timeout=DEFAULT_TIMEOUT, detached=False, remove_orphans=False):
         for plugin in self.plugins:
@@ -192,7 +191,6 @@ class DorkProject(Project, Pluggable):
         self.stop()
         for plugin in self.plugins:
             plugin.snapshot_save(names)
-        self.start()
 
     def snapshot_load(self, names=()):
         # If the names list is empty, collect most appropriate snapshots
@@ -210,7 +208,7 @@ class DorkProject(Project, Pluggable):
                 print(loaded)
                 break
 
-        self.start()
+        self.up()
 
     def snapshot_rm(self, names=()):
         # If the names list is empty, collect most removable snapshots
