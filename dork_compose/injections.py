@@ -191,7 +191,6 @@ class DorkProject(Project, Pluggable):
         self.stop()
         for plugin in self.plugins:
             plugin.snapshot_save(names)
-        self.start()
 
     def snapshot_load(self, names=()):
         # If the names list is empty, collect most appropriate snapshots
@@ -209,7 +208,7 @@ class DorkProject(Project, Pluggable):
                 print(loaded)
                 break
 
-        self.start()
+        self.up()
 
     def snapshot_rm(self, names=()):
         # If the names list is empty, collect most removable snapshots
