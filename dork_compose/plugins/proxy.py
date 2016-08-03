@@ -132,8 +132,6 @@ class Plugin(dork_compose.plugin.Plugin):
 
     def initializing(self, project, service_names=None):
         for service in project.get_services():
-            print service.name
-            print service.name not in self.auth['.no_auth']
             if self.auth_dir and 'environment' in service.options and 'VIRTUAL_HOST' in service.options['environment'] and service.name not in self.auth['.no_auth']:
                 lines = []
 
