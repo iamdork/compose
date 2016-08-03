@@ -132,13 +132,15 @@ class Plugin(dork_compose.plugin.Plugin):
 
     def initializing(self, project, service_names=None):
         for service in project.get_services():
-            if self.auth_dir and 'environment' in service.options and 'VIRTUAL_HOST' in service.options['environment']:
+            print service.name
+            print service.name not in self.auth['.no_auth']
+            if self.auth_dir and 'environment' in service.options and 'VIRTUAL_HOST' in service.options['environment'] and service.name not in self.auth['.no_auth']:
                 lines = []
 
                 if '.auth' in self.auth:
                     lines.extend(self.auth['.auth'])
 
-                if '.auth.%s' % service.name in self.auth and service.name not in self.auth['.no_auth']:
+                if '.auth.%s' % service.name in self.auth:
                     lines.extend(self.auth['.auth.%s' % service.name])
 
                 authfile = '%s/%s' % (self.auth_dir, service.options['environment']['VIRTUAL_HOST'])
