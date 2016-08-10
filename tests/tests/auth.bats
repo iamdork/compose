@@ -14,17 +14,20 @@ load common
 
   dork-compose up -d
 
-  # Test if the container started
+  # Test if the containers started
   docker ps | grep 'auth_http_1'
+  docker ps | grep 'auth_web_1'
 
   # Sleep to wait for the container to boot.
   sleep 1
 
-  # Test if the container is accessible using no login.
+  # Test if the containers are accessible using no login.
   curl -I --resolve auth.dork:80:127.0.0.1 http://auth.dork | grep '401 Unauthorized'
+  curl -I --resolve web--auth.dork:80:127.0.0.1 http://web--auth.dork | grep '401 Unauthorized'
 
   # Test if the container is accessible using no login.
   curl -u dork:dork --resolve auth.dork:80:127.0.0.1 http://auth.dork | grep '<h1>Testpage.</h1>'
+  curl -u dork:dork --resolve web--auth.dork:80:127.0.0.1 http://web--auth.dork | grep '<h1>Testpage.</h1>'
 
   dork-compose down
 
