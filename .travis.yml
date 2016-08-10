@@ -7,12 +7,7 @@ python:
 services:
   - docker
 
-env:
-  global:
-  - DOCKER_VERSION=1.11.2-0~trusty
-
 before_install:
-  - sudo apt-get -o Dpkg::Options::="--force-confnew" install -y docker-engine=${DOCKER_VERSION}
   - sudo add-apt-repository ppa:duggan/bats --yes
   - sudo apt-get update -qq
   - sudo apt-get install -qq bats
