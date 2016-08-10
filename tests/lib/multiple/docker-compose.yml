@@ -1,0 +1,16 @@
+version: '2'
+
+services:
+  http:
+    image: nginx
+    ports:
+    - 80:80
+    volumes:
+    - ${DORK_SOURCE}:/usr/share/nginx/html
+
+  web:
+    image: nginx
+    ports:
+    - 5000:80
+    volumes:
+    - ${DORK_SOURCE}:/usr/share/nginx/html

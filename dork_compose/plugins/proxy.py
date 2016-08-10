@@ -39,7 +39,7 @@ class Plugin(dork_compose.plugin.Plugin):
             if 'environment' in service.options and 'VIRTUAL_HOST' in service.options['environment']:
                 key = '"%s" url' % service.name
                 info[key] = service.options['environment'].get('VIRTUAL_PROTO', 'http') + '://' + service.options['environment']['VIRTUAL_HOST']
-                if '.auth' in auth or '.auth.%s' % service.name in auth:
+                if ('.auth' in auth or '.auth.%s' % service.name in auth) and service.name not in auth['.no_auth']:
                     info[key] += ' (password protected)'
         return info
 
@@ -91,7 +91,10 @@ class Plugin(dork_compose.plugin.Plugin):
                             del service['ports'][index]
 
     def collect_auth_files(self):
-        files = {}
+        files = {
+            '.no_auth': []
+        }
+
         path = filter(len, self.basedir.split('/'))
         current = ''
         while len(path):
@@ -109,17 +112,37 @@ class Plugin(dork_compose.plugin.Plugin):
                 with open(file) as f:
                     files[filename].append(f.read())
 
+            for file in glob.glob('%s/.no_auth*' % current):
+                filename = os.path.basename(file)
+                no_auth = filename.split('.no_auth.')
+                if len(no_auth) > 1:
+                    service = no_auth[1]
+
+                    auth_service = '.auth.%s' % service
+                    if auth_service in files:
+                       del files[auth_service]
+
+                    if '.no_auth' not in files:
+                        files['.no_auth'] = []
+                    files['.no_auth'].append(service)
+                else:
+                    del files['.auth']
+
         return files
 
     def initializing(self, project, service_names=None):
         for service in project.get_services():
-            if self.auth_dir and 'environment' in service.options and 'VIRTUAL_HOST' in service.options['environment']:
+            if self.auth_dir and 'environment' in service.options and 'VIRTUAL_HOST' in service.options['environment'] and service.name not in self.auth['.no_auth']:
                 lines = []
+
                 if '.auth' in self.auth:
                     lines.extend(self.auth['.auth'])
+
                 if '.auth.%s' % service.name in self.auth:
                     lines.extend(self.auth['.auth.%s' % service.name])
+
                 authfile = '%s/%s' % (self.auth_dir, service.options['environment']['VIRTUAL_HOST'])
+
                 if lines:
                     with open(authfile, mode='w+') as f:
                         f.writelines(lines)
