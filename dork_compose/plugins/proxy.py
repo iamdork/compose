@@ -144,6 +144,8 @@ class Plugin(dork_compose.plugin.Plugin):
                 authfile = '%s/%s' % (self.auth_dir, service.options['environment']['VIRTUAL_HOST'])
 
                 if lines:
+                    if not os.path.isdir(self.auth_dir):
+                        os.makedirs(self.auth_dir)
                     with open(authfile, mode='w+') as f:
                         f.writelines(lines)
                 elif os.path.exists(authfile):
