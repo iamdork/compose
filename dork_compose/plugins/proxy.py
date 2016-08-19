@@ -18,7 +18,8 @@ class Plugin(dork_compose.plugin.Plugin):
             'DOCKER_SOCK': self.docker_sock,
             'DORK_PROXY_AUTH_DIR': self.auth_dir,
             'DORK_PROXY_CERTS_DIR': self.certs_dir,
-            'DORK_PROXY_INSTANCE_DOMAIN': self.service_domain()
+            'DORK_PROXY_DOMAIN': self.proxy_domain,
+            'DORK_PROXY_INSTANCE_DOMAIN': self.service_domain(),
         }
 
     @property
@@ -60,7 +61,7 @@ class Plugin(dork_compose.plugin.Plugin):
 
     @property
     def proxy_domain(self):
-        return self.env.get('DORK_PROXY_DOMAIN', '127.0.0.1.xip.io')
+        return self.env.get('DORK_PROXY_DOMAIN', 'dork')
 
     def reload_proxy(self):
         client = docker_client(self.env)

@@ -1,0 +1,11 @@
+version: '2'
+
+services:
+  dns:
+    image: andyshinn/dnsmasq:2.75
+    cap_add:
+    - NET_ADMIN
+    ports:
+    - "53:53/tcp"
+    - "53:53/udp"
+    command: -A /${DORK_PROXY_DOMAIN}/127.0.0.1

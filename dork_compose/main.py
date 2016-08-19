@@ -17,7 +17,7 @@ from compose.config.environment import env_vars_from_file
 # multi: Assume single layer of multiple different projects.
 # repo:  Turn on git auto snapshots.
 # proxy: Run the proxy service.
-DEFAULT_PLUGINS = 'multi:lib:hotcode:git:filesystem:proxy'
+DEFAULT_PLUGINS = 'multi:lib:hotcode:git:filesystem:proxy:dns'
 
 
 def update_environment():
