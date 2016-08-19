@@ -41,7 +41,7 @@ class Plugin(dork_compose.plugin.Plugin):
                     'context': self.env.get('DORK_SOURCE'),
                     'onbuild': service['image']
                 }
-                service['image'] = "%s/%s" % (self.project, service['name'])
+                service['image'] = "%s/%s:%s" % (self.project, service['name'], self.instance)
 
     def building(self, service):
         if service.options['build']['context'] == self.env.get('DORK_SOURCE') and 'onbuild' in service.options['build']:
