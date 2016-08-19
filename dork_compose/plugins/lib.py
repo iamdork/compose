@@ -2,6 +2,7 @@ import dork_compose.plugin
 import os
 import shutil
 import tempfile
+import re
 from compose.config.environment import env_vars_from_file
 
 
@@ -32,7 +33,26 @@ class Plugin(dork_compose.plugin.Plugin):
             'Library': self.library
         }
 
+    def preprocess_config(self, config):
+        super(Plugin, self).preprocess_config(config)
+        for service in config.services:
+            if 'image' in service and 'build' not in service and re.search('-onbuild$', service['image']):
+                service['build'] = {
+                    'context': self.env.get('DORK_SOURCE'),
+                    'onbuild': service['image']
+                }
+                service['image'] = "%s/%s" % (self.project, service['name'])
+
     def building(self, service):
+        if service.options['build']['context'] == self.env.get('DORK_SOURCE') and 'onbuild' in service.options['build']:
+            dirname = tempfile.mktemp()
+            shutil.copytree(self.basedir, dirname, symlinks=True, ignore=lambda *args, **kwargs: ['.git'])
+            with open("%s/Dockerfile" % dirname, "w+") as f:
+                f.write("FROM %s" % service.options['build']['onbuild'])
+            del service.options['build']['onbuild']
+            service.options['build']['context'] = dirname
+            self.tempdirs.append(dirname)
+
         if 'environment' in service.options and 'DORK_SOURCE_PATH' in service.options['environment']:
             # Assemble the full build context for our service.
             dirname = tempfile.mktemp()
