@@ -44,28 +44,29 @@ class Plugin(dork_compose.plugin.Plugin):
                 service['image'] = "%s/%s:%s" % (self.project, service['name'], self.instance)
 
     def building(self, service):
+
+        # TODO: find a faster solution
+        # Perhaps there is a better option than a full source directory copy?
+        # Docker does not allow symlinks
+        # - hardlinks?
+        # - rsync?
+        # - mounting if possible?
+
+        tempdir = tempfile.mktemp()
+        self.tempdirs.append(tempdir)
         if service.options['build']['context'] == self.env.get('DORK_SOURCE') and 'onbuild' in service.options['build']:
-            dirname = tempfile.mktemp()
-            shutil.copytree(self.basedir, dirname, symlinks=True, ignore=lambda *args, **kwargs: ['.git'])
-            with open("%s/Dockerfile" % dirname, "w+") as f:
+            # Assemble the full build context for our service.
+            shutil.copytree(self.basedir, tempdir, symlinks=True, ignore=lambda *args, **kwargs: ['.git'])
+            with open("%s/Dockerfile" % tempdir, "w+") as f:
                 f.write("FROM %s" % service.options['build']['onbuild'])
             del service.options['build']['onbuild']
-            service.options['build']['context'] = dirname
-            self.tempdirs.append(dirname)
+            service.options['build']['context'] = tempdir
 
         if 'environment' in service.options and 'DORK_SOURCE_PATH' in service.options['environment']:
             # Assemble the full build context for our service.
-            dirname = tempfile.mktemp()
-            self.tempdirs.append(dirname)
-            shutil.copytree(service.options['build']['context'], dirname, symlinks=True, ignore=lambda *args, **kwargs: ['.git'])
-            # TODO: find a faster solution
-            # Perhaps there is a better option than a full source directory copy?
-            # Docker does not allow symlinks
-            # - hardlinks?
-            # - rsync?
-            # - mounting if possible?
-            shutil.copytree(self.basedir, '%s%s' % (dirname, service.options['environment']['DORK_SOURCE_PATH']), symlinks=True, ignore=lambda *args, **kwargs: ['.git'])
-            service.options['build']['context'] = dirname
+            shutil.copytree(service.options['build']['context'], tempdir, symlinks=True, ignore=lambda *args, **kwargs: ['.git'])
+            shutil.copytree(self.basedir, '%s%s' % (tempdir, service.options['environment']['DORK_SOURCE_PATH']), symlinks=True, ignore=lambda *args, **kwargs: ['.git'])
+            service.options['build']['context'] = tempdir
 
     def cleanup(self):
         for d in self.tempdirs:

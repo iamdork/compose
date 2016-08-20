@@ -11,6 +11,9 @@ before_install:
   - sudo add-apt-repository ppa:duggan/bats --yes
   - sudo apt-get update -qq
   - sudo apt-get install -qq bats
+  # Kill everything that claims port 53 and 80, so they are free for sure.
+  - lsof -i tcp:53 | awk 'NR!=1 {print $2}' | xargs kill
+  - lsof -i tcp:80 | awk 'NR!=1 {print $2}' | xargs kill
 
 install: "pip install -e ."
 script: cd tests; bats tests
