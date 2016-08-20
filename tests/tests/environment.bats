@@ -12,7 +12,7 @@ load common
   sleep 1
 
   # Test if the container is accessible.
-  get a.dork | grep '<h1>This is a test.</h1>'
+  get a.dork.io | grep '<h1>This is a test.</h1>'
 
   dork-compose down
 }
@@ -27,7 +27,7 @@ load common
   sleep 1
 
   # Test if the container is accessible.
-  get a.dork | grep '<h1>This is overridden.</h1>'
+  get a.dork.io | grep '<h1>This is overridden.</h1>'
 
   dork-compose down
 }

@@ -6,7 +6,7 @@ load common
   cd sources/simple
 
   # Check if the url is available in the info.
-  dork-compose info | grep 'http://simple.dork'
+  dork-compose info | grep 'http://simple.dork.io'
 }
 
 @test "Simple project accessible" {
@@ -21,7 +21,7 @@ load common
   sleep 1
 
   # Test if the container is accessible.
-  get simple.dork | grep '<h1>Testpage.</h1>'
+  get simple.dork.io | grep '<h1>Testpage.</h1>'
 
   dork-compose down
 

@@ -12,10 +12,10 @@ load common
   sleep 1
 
   # Test if the container is accessible.
-  get tree--one.dork index.html | grep '<h1>Testpage 1</h1>'
+  get tree--one.dork.io index.html | grep '<h1>Testpage 1</h1>'
 
   # Test if the container is accessible.
-  get tree--two.dork index.html | grep '<h1>Testpage 2</h1>'
+  get tree--two.dork.io index.html | grep '<h1>Testpage 2</h1>'
 
   cd $SOURCES/tree/one
   dork-compose down

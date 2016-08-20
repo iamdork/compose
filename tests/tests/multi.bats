@@ -17,9 +17,9 @@ load common
   sleep 1
 
   # Test if the container is accessible.
-  get one.dork | grep '<h1>Testpage 1.</h1>'
-  get two.dork | grep '<h1>Testpage 2.</h1>'
-  get three.dork | grep '<h1>Testpage 3.</h1>'
+  get one.dork.io | grep '<h1>Testpage 1.</h1>'
+  get two.dork.io | grep '<h1>Testpage 2.</h1>'
+  get three.dork.io | grep '<h1>Testpage 3.</h1>'
 
   cd $SOURCES/multi/one && dork-compose down
   cd $SOURCES/multi/two && dork-compose down
@@ -47,9 +47,9 @@ load common
   sleep 1
 
   # Test if the container is accessible.
-  get one.dork | grep '<h1>Testpage 1.</h1>'
-  get two.dork | grep '<h1>Testpage 2.</h1>'
-  get three.dork | grep '<h1>Testpage 3.</h1>'
+  get one.dork.io | grep '<h1>Testpage 1.</h1>'
+  get two.dork.io | grep '<h1>Testpage 2.</h1>'
+  get three.dork.io | grep '<h1>Testpage 3.</h1>'
 
   (cd $SOURCES/multi/one && dork-compose down) &
   (cd $SOURCES/multi/two && dork-compose down) &
