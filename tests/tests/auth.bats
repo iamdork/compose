@@ -22,12 +22,12 @@ load common
   sleep 1
 
   # Test if the containers are accessible using no login.
-  curl -I --resolve auth.dork.io:80:127.0.0.1 http://auth.dork.io | grep '401 Unauthorized'
-  curl -I --resolve web--auth.dork.io:80:127.0.0.1 http://web--auth.dork.io | grep '401 Unauthorized'
+  curl -I http://auth.dork.io | grep '401 Unauthorized'
+  curl -I http://web--auth.dork.io | grep '401 Unauthorized'
 
   # Test if the container is accessible using a login.
-  curl -u dork:dork --resolve auth.dork.io:80:127.0.0.1 http://auth.dork.io | grep '<h1>Testpage.</h1>'
-  curl -u dork:dork --resolve web--auth.dork.io:80:127.0.0.1 http://web--auth.dork.io | grep '<h1>Testpage.</h1>'
+  curl -u dork:dork http://auth.dork.io | grep '<h1>Testpage.</h1>'
+  curl -u dork:dork http://web--auth.dork.io | grep '<h1>Testpage.</h1>'
 
   dork-compose down
 
@@ -49,10 +49,10 @@ load common
   sleep 1
 
   # The main http container should be accessible using the login
-  curl -u dork:dork --resolve noauth.dork.io:80:127.0.0.1 http://noauth.dork.io | grep '<h1>Testpage.</h1>'
+  curl -u dork:dork http://noauth.dork.io | grep '<h1>Testpage.</h1>'
 
   # The web container should be accessible with a login.
-  curl -u dork:dork --resolve web--noauth.dork.io:80:127.0.0.1 http://web--noauth.dork.io | grep '<h1>Testpage.</h1>'
+  curl -u dork:dork http://web--noauth.dork.io | grep '<h1>Testpage.</h1>'
 
   dork-compose down
 
