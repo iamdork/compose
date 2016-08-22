@@ -26,6 +26,11 @@ class Plugin(dork_compose.plugin.Plugin):
         if os.path.isfile(filename):
             for key, value in env_vars_from_file(filename).iteritems():
                 self.env[key] = os.path.expandvars(self.env.get(key, value))
+
+        filename = '%s/.dork.env' % self.library
+        if os.path.isfile(filename):
+            for key, value in env_vars_from_file(filename).iteritems():
+                self.env[key] = os.path.expandvars(self.env.get(key, value))
         return self.env
 
     def info(self, project):
@@ -36,7 +41,7 @@ class Plugin(dork_compose.plugin.Plugin):
     def preprocess_config(self, config):
         super(Plugin, self).preprocess_config(config)
         for service in config.services:
-            if 'image' in service and 'build' not in service and re.search('-onbuild$', service['image']):
+            if 'image' in service and re.search('-onbuild$', service['image']):
                 service['build'] = {
                     'context': self.env.get('DORK_SOURCE'),
                     'onbuild': service['image']
