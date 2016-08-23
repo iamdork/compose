@@ -68,7 +68,8 @@ setup(
         'docker-compose==1.8.0',
         'gitpython',
         'terminaltables',
-        'filelock'
+        'filelock',
+        'hvac'
     ],
 
     # List additional groups of dependencies here (e.g. development

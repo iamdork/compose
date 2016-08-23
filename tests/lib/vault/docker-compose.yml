@@ -1,0 +1,9 @@
+version: '2'
+services:
+  http:
+    build:
+      context: secret
+      args:
+        VAULT_TOKEN:
+    ports:
+    - 80:80
