@@ -38,7 +38,7 @@ class Plugin(dork_compose.plugin.Plugin):
         auth = self.collect_auth_files()
         for service in project.services:
             if 'environment' in service.options and 'VIRTUAL_HOST' in service.options['environment']:
-                key = '"%s" url' % service.name
+                key = '%s url' % service.name
                 info[key] = service.options['environment'].get('VIRTUAL_PROTO', 'http') + '://' + service.options['environment']['VIRTUAL_HOST']
                 if ('.auth' in auth or '.auth.%s' % service.name in auth) and service.name not in auth['.no_auth']:
                     info[key] += ' (password protected)'
