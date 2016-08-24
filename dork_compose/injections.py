@@ -126,7 +126,6 @@ class DorkService(Service, Pluggable):
     def create_container(self, one_off=False, previous_container=None,
                          number=None, quiet=False, **override_options):
 
-        self.ensure_image_exists()
         for plugin in self.plugins:
             plugin.creating_container(self)
         return super(DorkService, self).create_container(one_off,
