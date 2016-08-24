@@ -117,6 +117,12 @@ class Plugin(object):
     def initializing(self, project, service_names=None):
         pass
 
+    def creating_container(self, service):
+        pass
+
+    def starting_container(self, container):
+        pass
+
     def initialized(self, project, containers=None):
         pass
 

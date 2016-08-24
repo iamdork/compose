@@ -118,6 +118,22 @@ class DorkService(Service, Pluggable):
             plugin.building(self)
         return super(DorkService, self).build(no_cache, pull, force_rm)
 
+    def start_container(self, container):
+        for plugin in self.plugins:
+            plugin.starting_container(container)
+        return super(DorkService, self).start_container(container)
+
+    def create_container(self, one_off=False, previous_container=None,
+                         number=None, quiet=False, **override_options):
+
+        self.ensure_image_exists()
+        for plugin in self.plugins:
+            plugin.creating_container(self)
+        return super(DorkService, self).create_container(one_off,
+                                                         previous_container,
+                                                         number, quiet,
+                                                         **override_options)
+
 
 class DorkNetworks(ProjectNetworks, Pluggable):
     def initialize(self):
