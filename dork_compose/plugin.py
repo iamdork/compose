@@ -254,7 +254,9 @@ class Plugin(object):
                 if network in container['NetworkSettings']['Networks']:
                     client.disconnect_container_from_network(container, network)
                     if (len(container['NetworkSettings']['Networks']) - 1) == len(aux.networks.networks):
-                        aux.down(remove_image_type=None, include_volumes=False, remove_orphans=True)
+                        # aux.down(remove_image_type=None, include_volumes=False, remove_orphans=True)
+                        # TODO: investigate why auxiliary service shutdowns dont always work
+                        pass
 
     def get_auxiliary_project(self):
         config_details = config.find(self.auxiliary_project, [], self.environment())

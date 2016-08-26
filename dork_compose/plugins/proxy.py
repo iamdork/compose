@@ -5,6 +5,7 @@ import os
 import glob
 import urlparse
 import pkg_resources
+from subprocess import check_call
 
 
 class Plugin(dork_compose.plugin.Plugin):
@@ -15,11 +16,13 @@ class Plugin(dork_compose.plugin.Plugin):
 
     def environment(self):
         return {
+            'DORK_PROXY_HTTPS_METHOD': self.https_method,
             'DOCKER_SOCK': self.docker_sock,
             'DORK_PROXY_AUTH_DIR': self.auth_dir,
             'DORK_PROXY_CERTS_DIR': self.certs_dir,
             'DORK_PROXY_DOMAIN': self.proxy_domain,
             'DORK_PROXY_INSTANCE_DOMAIN': self.service_domain(),
+            'DORK_PROXY_LETSENCRYPT_EMAIL': self.letsencrypt_email,
         }
 
     @property
@@ -45,6 +48,9 @@ class Plugin(dork_compose.plugin.Plugin):
         return info
 
     @property
+    def https_method(self):
+        return os.path.expanduser(self.env.get('DORK_PROXY_HTTPS_METHOD', 'noredirect'))
+    @property
     def auth_dir(self):
         return os.path.expanduser(self.env.get('DORK_PROXY_AUTH_DIR', '%s/auth' % self.datadir))
 
@@ -63,6 +69,10 @@ class Plugin(dork_compose.plugin.Plugin):
     def proxy_domain(self):
         return self.env.get('DORK_PROXY_DOMAIN', 'dork')
 
+    @property
+    def letsencrypt_email(self):
+        return self.env.get('DORK_PROXY_LETSENCRYPT_EMAIL', 'admin@localhost')
+
     def reload_proxy(self):
         client = docker_client(self.env)
         containers = client.containers(all=True, filters={
@@ -74,20 +84,26 @@ class Plugin(dork_compose.plugin.Plugin):
             client.exec_start(ex)
 
     def preprocess_config(self, config):
+
         for service in config.services:
             if 'ports' in service:
-                for index, port in enumerate(service['ports']):
+                indices = range(len(service['ports']))
+                indices.reverse()
+                for index in indices:
+                    port = service['ports'][index]
                     if isinstance(port, basestring):
+                        if ':' not in port:
+                            continue
                         (external, internal) = port.split(':')
                         if external and internal:
                             domain = self.service_domain() if external == '80' or external == '443' else self.service_domain(service['name'])
                             if 'environment' not in service:
                                 service['environment'] = {}
                             service['environment']['VIRTUAL_HOST'] = domain
+                            service['environment']['LETSENCRYPT_HOST'] = domain
+                            service['environment']['LETSENCRYPT_EMAIL'] = self.letsencrypt_email
                             if 'labels' not in service:
                                 service['labels'] = {}
-                            if external == '443':
-                                service['environment']['VIRTUAL_PROTO'] = 'https'
                             service['environment']['VIRTUAL_PORT'] = int(internal)
                             del service['ports'][index]
 
@@ -132,6 +148,26 @@ class Plugin(dork_compose.plugin.Plugin):
         return files
 
     def initializing(self, project, service_names=None):
+        if not os.path.isdir(self.certs_dir):
+            os.makedirs(self.certs_dir)
+
+        if not os.path.isfile(self.certs_dir + '/dhparam.pem'):
+            print "Creating Diffie-Hellman group. This might take a while."
+            check_call(['openssl', 'dhparam', '-out', '%s/dhparam.pem' % self.certs_dir, '2048'])
+
+        key = '%s/%s.key' % (self.certs_dir, self.proxy_domain)
+        crt = '%s/%s.crt' % (self.certs_dir, self.proxy_domain)
+
+        if not os.path.isfile(key) or not os.path.isfile(crt):
+            print "Creating self signed key and certificate for domain '%s'." % self.proxy_domain
+            check_call([
+                'openssl', 'req', '-x509', '-nodes',
+                '-days', '365', '-newkey', 'rsa:2048',
+                '-keyout', key,
+                '-out', crt,
+                '-subj', '/C=GB/ST=London/L=London/O=Global Security/OU=IT Department/CN=*.%s' % self.proxy_domain
+            ])
+
         for service in project.get_services():
             if self.auth_dir and 'environment' in service.options and 'VIRTUAL_HOST' in service.options['environment'] and service.name not in self.auth['.no_auth']:
                 lines = []

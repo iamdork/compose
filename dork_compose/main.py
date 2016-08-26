@@ -26,8 +26,6 @@ def update_environment():
     # current and parent directories.
     path = filter(len, os.path.abspath(os.path.curdir).split('/'))
     current = ''
-    env = {}
-    env.update(os.environ)
 
     while len(path):
         current = current + '/' + path.pop(0)
@@ -36,12 +34,11 @@ def update_environment():
             for key, value in env_vars_from_file(envfile).iteritems():
                 os.environ[key] = os.path.expandvars(value)
             continue
+
         envfile = '%s/.env' % current
         if os.path.isfile(envfile):
             for key, value in env_vars_from_file(envfile).iteritems():
                 os.environ[key] = os.path.expandvars(value)
-
-    env.update(os.environ)
 
     if 'DORK_PLUGINS' not in os.environ:
         os.environ['DORK_PLUGINS'] = DEFAULT_PLUGINS
