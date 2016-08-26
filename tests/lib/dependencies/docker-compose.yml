@@ -1,6 +1,6 @@
 version: '2'
 services:
-  app:
+  web:
     build:
-      context: ./bash
+      context: web
       source: .

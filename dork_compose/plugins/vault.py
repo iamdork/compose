@@ -47,7 +47,7 @@ class Plugin(dork_compose.plugin.Plugin):
     def auxiliary_project(self):
         return pkg_resources.resource_filename('dork_compose', 'auxiliary/vault')
 
-    def building(self, service):
+    def building(self, service,  no_cache, pull, force_rm):
         if 'args' in service.options['build'] and 'VAULT_TOKEN' in service.options['build']['args']:
             client = hvac.Client(
                 url="http://%s:%s" % (self.vault_host, self.vault_port),
@@ -57,6 +57,8 @@ class Plugin(dork_compose.plugin.Plugin):
             self.tokens.append(token)
             for secret in self.vault_secrets:
                 value = self.env.get(secret)
+                if not value:
+                    raise ValueError("Environment variable %s required as secret is not defined." % secret)
                 if os.path.isfile(value):
                     with open(value, 'r') as f:
                         value = f.read()
@@ -65,9 +67,6 @@ class Plugin(dork_compose.plugin.Plugin):
             service.options['build']['args']['VAULT_ADDR'] = 'http://%s:%s' % (
                 self.vault_build_host, self.vault_port
             )
-            super(Plugin, self).building(service)
-        else:
-            super(Plugin, self).building(service)
 
     def cleanup(self):
         client = hvac.Client(

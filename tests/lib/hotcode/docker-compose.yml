@@ -1,6 +1,6 @@
 version: '2'
 services:
   http:
-    build: http
+    build: web
     ports:
     - 80:80

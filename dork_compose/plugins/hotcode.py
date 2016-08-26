@@ -1,28 +1,57 @@
 import dork_compose.plugin
 from compose.config.config import VolumeSpec
+from compose.service import NoSuchImageError
+from docker.client import from_env
+from docker.errors import APIError
 
 
 class Plugin(dork_compose.plugin.Plugin):
-    @property
-    def paths(self):
-        return filter(lambda x: x, self.env.get('DORK_HOT_CODE_PATHS', '').split(';'))
+
+    def get_hotcode_volumes(self, image):
+        root = image.get('Config', {}).get('Labels', {}).get('dork.root')
+        source = image.get('Config', {}).get('Labels', {}).get('dork.source', '.')
+        if not root:
+            return []
+
+        paths = filter(lambda x: x, image.get('Config', {}) \
+            .get('Labels', {}) \
+            .get('dork.hotcode', '') \
+            .split(';'))
+
+        return [VolumeSpec.parse(':'.join([
+            '%s/%s/%s' % (self.env['DORK_SOURCE'], source, path),
+            '%s/%s' % (root.rstrip('/'), path),
+            'rw'
+        ])) for path in paths]
 
     def creating_container(self, service):
         """
         Inject volumes for all hot code paths.
         """
-        service.ensure_image_exists()
-        image = service.client.inspect_image(service.image_name)
-        root = image.get('Config', {}).get('Labels', {}).get('dork.hotcode.root')
-        if not root:
+        try:
+            image = service.client.inspect_image(service.image_name)
+        except APIError:
             return
+        externals = [v.external for v in service.options['volumes']]
+        for v in self.get_hotcode_volumes(image):
+            if v.external not in externals:
+                service.options['volumes'].append(v)
 
-        src = self.env['DORK_SOURCE']
-        for path in self.paths:
-            service.options['volumes'].append(VolumeSpec.parse(':'.join([
-                '%s/%s' % (src, path),
-                '%s/%s' % (root.rstrip('/'), path),
-                'rw'
-            ])))
+    def preprocess_config(self, config):
+        for service in config.services:
+            client = from_env()
+            if 'image' not in service:
+                continue
+            try:
+                image = client.inspect_image(service['image'])
+                if 'volumes' not in service:
+                    service['volumes'] = []
+                service['volumes'] = self.get_hotcode_volumes(image) + service['volumes']
+            except APIError:
+                pass
+
+
+
+
 
 

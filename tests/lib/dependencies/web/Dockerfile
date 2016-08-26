@@ -1,7 +1,7 @@
 FROM nginx
 
-LABEL dork.buildresults.root="/usr/share/nginx" \
-      dork.buildresults.paths="html;test"
+LABEL dork.root="/usr/share/nginx" \
+      dork.dependencies="html;test"
 
 RUN echo "This is created during build." >> /usr/share/nginx/html/test.txt
 RUN mkdir /usr/share/nginx/test

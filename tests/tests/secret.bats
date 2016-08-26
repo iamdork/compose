@@ -5,7 +5,7 @@ load common
 @test "Build secret test" {
   cd sources/secret
 
-  dork-compose up -d
+  dork-compose up -d --build
 
   # Test if the http service is available and running.
   docker ps | grep 'secret_http_1'

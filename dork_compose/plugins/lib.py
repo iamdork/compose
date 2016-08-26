@@ -1,18 +1,10 @@
 import dork_compose.plugin
 import os
-import shutil
-import tempfile
-import re
+
 from compose.config.environment import env_vars_from_file
 
 
 class Plugin(dork_compose.plugin.Plugin):
-
-    def __init__(self, env, name):
-        dork_compose.plugin.Plugin.__init__(self, env, name)
-        self.tempdirs = []
-        if self.library:
-            os.chdir(self.library)
 
     @property
     def library(self):
@@ -22,55 +14,25 @@ class Plugin(dork_compose.plugin.Plugin):
         ]))
 
     def environment(self):
-        filename = '%s/.env' % self.library
-        if os.path.isfile(filename):
-            for key, value in env_vars_from_file(filename).iteritems():
-                self.env[key] = os.path.expandvars(self.env.get(key, value))
+        env = {}
+        if self.library:
 
-        filename = '%s/.dork.env' % self.library
-        if os.path.isfile(filename):
-            for key, value in env_vars_from_file(filename).iteritems():
-                self.env[key] = os.path.expandvars(self.env.get(key, value))
-        return self.env
+            files = filter(lambda x: x, self.env.get('COMPOSE_FILE', '').split(':'))
+            if os.path.isfile('docker-compose.yml') and not files:
+                files.append('docker-compose.yml')
+            files.append(self.library + '/docker-compose.yml')
+            env.update({
+                'COMPOSE_FILE': ':'.join(files)
+            })
+            envfile = '%s/.dork.env' % self.library
+            if os.path.isfile(envfile):
+                for key, value in env_vars_from_file(envfile).iteritems():
+                    env[key] = os.path.expandvars(value)
+            envfile = '%s/.env' % self.library
+            if os.path.isfile(envfile):
+                for key, value in env_vars_from_file(envfile).iteritems():
+                    env[key] = os.path.expandvars(value)
+        return env
 
-    def info(self, project):
-        return {
-            'Library': self.library
-        }
 
-    def preprocess_config(self, config):
-        super(Plugin, self).preprocess_config(config)
-        for service in config.services:
-            if 'image' in service and re.search('-onbuild$', service['image']):
-                service['build']['context'] = self.env.get('DORK_SOURCE')
-                service['build']['onbuild'] = service['image']
-                service['image'] = "%s/%s:%s" % (self.project, service['name'], self.instance)
 
-    def building(self, service):
-
-        # TODO: find a faster solution
-        # Perhaps there is a better option than a full source directory copy?
-        # Docker does not allow symlinks
-        # - hardlinks?
-        # - rsync?
-        # - mounting if possible?
-
-        tempdir = tempfile.mktemp()
-        self.tempdirs.append(tempdir)
-        if service.options['build']['context'] == self.env.get('DORK_SOURCE') and 'onbuild' in service.options['build']:
-            # Assemble the full build context for our service.
-            shutil.copytree(self.basedir, tempdir, symlinks=True, ignore=lambda *args, **kwargs: ['.git'])
-            with open("%s/Dockerfile" % tempdir, "w+") as f:
-                f.write("FROM %s" % service.options['build']['onbuild'])
-            del service.options['build']['onbuild']
-            service.options['build']['context'] = tempdir
-
-        if 'environment' in service.options and 'DORK_SOURCE_PATH' in service.options['environment']:
-            # Assemble the full build context for our service.
-            shutil.copytree(service.options['build']['context'], tempdir, symlinks=True, ignore=lambda *args, **kwargs: ['.git'])
-            shutil.copytree(self.basedir, '%s%s' % (tempdir, service.options['environment']['DORK_SOURCE_PATH']), symlinks=True, ignore=lambda *args, **kwargs: ['.git'])
-            service.options['build']['context'] = tempdir
-
-    def cleanup(self):
-        for d in self.tempdirs:
-            shutil.rmtree(d, ignore_errors=True)

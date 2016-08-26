@@ -1,0 +1,16 @@
+version: '2'
+
+services:
+  a:
+    build:
+      context: html
+      source: .
+    ports:
+    - 81:80
+
+  b:
+    build:
+      context: html
+      source: sub
+    ports:
+    - 82:80

@@ -1,4 +1,4 @@
 FROM ubuntu
-ADD source/test.sh /test.sh
-RUN chmod +x /test.sh
-CMD /test.sh
+ONBUILD ADD test.sh /test.sh
+ONBUILD RUN chmod +x /test.sh
+ONBUILD CMD /test.sh

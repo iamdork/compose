@@ -55,6 +55,7 @@ def load(plugins):
                 'COMPOSE_PROJECT_NAME': '--'.join(parts)
             })
 
+    environment.update(os.environ)
     os.environ.update(environment)
 
     yield instances
@@ -102,6 +103,9 @@ class Plugin(object):
     def info(self, project):
         return {}
 
+    def alter_config_schema(self, schema):
+        pass
+
     def preprocess_config(self, config):
         """
         Alter the docker-compose configuration object. The object is passed
@@ -111,7 +115,7 @@ class Plugin(object):
         """
         pass
 
-    def building(self, service):
+    def building(self, service, no_cache, pull, force_rm):
         pass
 
     def initializing(self, project, service_names=None):

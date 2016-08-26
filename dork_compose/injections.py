@@ -9,9 +9,16 @@ from compose.config.environment import Environment
 from compose.const import DEFAULT_TIMEOUT
 from compose.project import Project, ProjectNetworks
 from compose.service import ConvergenceStrategy, BuildAction, Service
+from compose.config.validation import load_jsonschema, get_resolver_path, \
+    handle_errors, process_config_schema_errors, \
+    process_service_constraint_errors
 from dork_compose.helpers import tru
 
 from functools import partial
+
+from jsonschema import Draft4Validator
+from jsonschema import FormatChecker
+from jsonschema import RefResolver
 
 
 def dork_config_load(plugins, config_details):
@@ -50,6 +57,35 @@ def get_dork_project_name(working_dir, project_name=None, environment=None):
         return normalize_name(project)
 
     return 'default'
+
+
+def dork_validate_service_constraints(plugins, config, service_name, version):
+    def handler(errors):
+        return process_service_constraint_errors(errors, service_name, version)
+    schema = load_jsonschema(version)
+
+    for plugin in plugins:
+        plugin.alter_config_schema(schema)
+
+    validator = Draft4Validator(schema['definitions']['constraints']['service'])
+    handle_errors(validator.iter_errors(config), handler, None)
+
+def dork_validate_against_config_schema(plugins, config_file):
+    schema = load_jsonschema(config_file.version)
+    for plugin in plugins:
+        plugin.alter_config_schema(schema)
+    format_checker = FormatChecker(["ports", "expose"])
+    validator = Draft4Validator(
+        schema,
+        # TODO: wait for fix in docker-compose
+        # docker-compose does not append filename, therefore caches
+        # always miss.
+        resolver=RefResolver(get_resolver_path() + "config_schema_v{0}.json".format(config_file.version), schema),
+        format_checker=format_checker)
+    handle_errors(
+        validator.iter_errors(config_file.config),
+        process_config_schema_errors,
+        config_file.filename)
 
 
 class DorkTopLevelCommand(TopLevelCommand):
@@ -115,7 +151,7 @@ class DorkService(Service, Pluggable):
 
     def build(self, no_cache=False, pull=False, force_rm=False):
         for plugin in self.plugins:
-            plugin.building(self)
+            plugin.building(self, no_cache, pull, force_rm)
         return super(DorkService, self).build(no_cache, pull, force_rm)
 
     def start_container(self, container):
