@@ -70,6 +70,7 @@ def dork_validate_service_constraints(plugins, config, service_name, version):
     validator = Draft4Validator(schema['definitions']['constraints']['service'])
     handle_errors(validator.iter_errors(config), handler, None)
 
+
 def dork_validate_against_config_schema(plugins, config_file):
     schema = load_jsonschema(config_file.version)
     for plugin in plugins:
