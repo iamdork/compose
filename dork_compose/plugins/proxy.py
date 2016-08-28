@@ -17,6 +17,7 @@ class Plugin(dork_compose.plugin.Plugin):
     def environment(self):
         return {
             'DORK_PROXY_HTTPS_METHOD': self.https_method,
+            'DORK_PROXY_HTTPS_SIGNING': self.https_signing,
             'DOCKER_SOCK': self.docker_sock,
             'DORK_PROXY_AUTH_DIR': self.auth_dir,
             'DORK_PROXY_CERTS_DIR': self.certs_dir,
@@ -26,8 +27,12 @@ class Plugin(dork_compose.plugin.Plugin):
         }
 
     @property
+    def https_signing(self):
+        return self.env.get('DORK_PROXY_HTTPS_SIGNING', 'selfsigned')
+
+    @property
     def auxiliary_project(self):
-        return pkg_resources.resource_filename('dork_compose', 'auxiliary/proxy')
+        return pkg_resources.resource_filename('dork_compose', 'auxiliary/proxy/%s' % self.https_signing)
 
     def service_domain(self, service=None):
         return '--'.join(filter(tru, [
@@ -148,25 +153,27 @@ class Plugin(dork_compose.plugin.Plugin):
         return files
 
     def initializing(self, project, service_names=None):
-        if not os.path.isdir(self.certs_dir):
-            os.makedirs(self.certs_dir)
+        if self.https_signing == 'selfsigned':
+            if not os.path.isdir(self.certs_dir):
+                os.makedirs(self.certs_dir)
 
-        if not os.path.isfile(self.certs_dir + '/dhparam.pem'):
-            print "Creating Diffie-Hellman group. This might take a while."
-            check_call(['openssl', 'dhparam', '-out', '%s/dhparam.pem' % self.certs_dir, '2048'])
+            if not os.path.isfile(self.certs_dir + '/dhparam.pem'):
+                print "Creating Diffie-Hellman group. This might take a while."
+                check_call(['openssl', 'dhparam', '-out', '%s/dhparam.pem' % self.certs_dir, '2048'])
 
-        key = '%s/%s.key' % (self.certs_dir, self.proxy_domain)
-        crt = '%s/%s.crt' % (self.certs_dir, self.proxy_domain)
+            key = '%s/%s.key' % (self.certs_dir, self.proxy_domain)
+            crt = '%s/%s.crt' % (self.certs_dir, self.proxy_domain)
 
-        if not os.path.isfile(key) or not os.path.isfile(crt):
-            print "Creating self signed key and certificate for domain '%s'." % self.proxy_domain
-            check_call([
-                'openssl', 'req', '-x509', '-nodes',
-                '-days', '365', '-newkey', 'rsa:2048',
-                '-keyout', key,
-                '-out', crt,
-                '-subj', '/C=GB/ST=London/L=London/O=Global Security/OU=IT Department/CN=*.%s' % self.proxy_domain
-            ])
+            if not os.path.isfile(key) or not os.path.isfile(crt):
+                print "Creating self signed key and certificate for domain '%s'." % self.proxy_domain
+                check_call([
+                    'openssl', 'req', '-x509', '-nodes',
+                    '-days', '365', '-newkey', 'rsa:2048',
+                    '-keyout', key,
+                    '-out', crt,
+                    # TODO: fix signed parameters
+                    '-subj', '/C=GB/ST=London/L=London/O=Global Security/OU=IT Department/CN=*.%s' % self.proxy_domain
+                ])
 
         for service in project.get_services():
             if self.auth_dir and 'environment' in service.options and 'VIRTUAL_HOST' in service.options['environment'] and service.name not in self.auth['.no_auth']:

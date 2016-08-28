@@ -1,0 +1,39 @@
+version: '2'
+
+services:
+  nginx:
+    image: nginx
+    labels:
+    - org.iamdork.auxiliary
+    ports:
+    - "80:80"
+    - "443:443"
+    volumes:
+    - /etc/nginx/vhost.d
+    - /usr/share/nginx/html
+    - /etc/nginx/conf.d
+    - ${DORK_PROXY_AUTH_DIR}:/etc/nginx/htpasswd:ro
+    - ${DORK_PROXY_CERTS_DIR}:/etc/nginx/certs:ro
+
+  dockergen:
+    image: iamdork/dockergen
+    build: ../dockergen
+    labels:
+    - org.iamdork.auxiliary
+    volumes_from:
+    - nginx
+    volumes:
+    - ${DOCKER_SOCK}:/tmp/docker.sock:ro
+    command: -notify-sighup dork_aux_proxy_nginx_1 -watch /etc/docker-gen/templates/nginx.tmpl /etc/nginx/conf.d/default.conf
+    environment:
+      HTTPS_METHOD: ${DORK_PROXY_HTTPS_METHOD}
+
+  letsencrypt:
+    image: jrcs/letsencrypt-nginx-proxy-companion
+    labels:
+    - org.iamdork.auxiliary
+    volumes_from:
+    - nginx
+    volumes:
+    - /etc/nginx/certs
+    - ${DOCKER_SOCK}:/var/run/docker.sock:ro
