@@ -3,6 +3,8 @@
 load common
 
 @test "Test tree setup" {
+  export DORK_PLUGINS="env:lib:tree:proxy"
+
   cd $SOURCES/tree/one
   dork-compose up -d
   cd $SOURCES/tree/two
