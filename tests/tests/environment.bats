@@ -18,9 +18,10 @@ load common
 }
 
 
-@test "Environment variable override." {
+@test "Environment precedence." {
   cd sources/environment/a
-  export ENVIRONMENT_TEST="This will not overridden."
+  export WHATISIT="a test"
+  export ENVIRONMENT_TEST="This override will not work."
   dork-compose up -d
 
   # Sleep to wait for the container to boot.

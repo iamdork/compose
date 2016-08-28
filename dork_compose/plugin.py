@@ -55,7 +55,6 @@ def load(plugins):
                 'COMPOSE_PROJECT_NAME': '--'.join(parts)
             })
 
-    environment.update(os.environ)
     os.environ.update(environment)
 
     yield instances
