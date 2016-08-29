@@ -25,7 +25,7 @@ class Plugin(dork_compose.plugin.Plugin):
         envfile = '%s/.env' % self.library
         if os.path.isfile(envfile):
             for key, value in env_vars_from_file(envfile).iteritems():
-                if key not in os.environ:
+                if key not in self.env:
                     env[key] = os.path.expandvars(value)
         return env
 
