@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-dark.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print">
+
+    <title>dork-compose by iamdork</title>
+  </head>
+
+  <body>
+
+    <header>
+      <div class="container">
+        <h1>dork-compose</h1>
+        <h2>Command line replacement for docker-compose, adding dork magics.</h2>
+
+        <section id="downloads">
+          <a href="https://github.com/iamdork/compose/zipball/master" class="btn">Download as .zip</a>
+          <a href="https://github.com/iamdork/compose/tarball/master" class="btn">Download as .tar.gz</a>
+          <a href="https://github.com/iamdork/compose" class="btn btn-github"><span class="icon"></span>View on GitHub</a>
+        </section>
+      </div>
+    </header>
+
+    <div class="container">
+      <section id="main_content">
+        <h1>
+<a id="dork-compose" class="anchor" href="#dork-compose" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Dork Compose</h1>
+
+<p><img src="https://travis-ci.org/iamdork/compose.svg?branch=master" alt="Build Status"></p>
+
+<h2>
+<a id="what-is-this" class="anchor" href="#what-is-this" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>What is this?</h2>
+
+<p><code>dork-compose</code> is a drop in replacement for the <a href="https://docs.docker.com/compose/">docker-compose</a> command line tool, adding some convenience features for running multiple compose projects on the same host.</p>
+
+<ul>
+<li>Volume snapshots with automatic versioning.</li>
+<li>Separation of Docker setup (<code>Dockerfile</code> and <code>docker-compose.yml</code>) from application source code.</li>
+<li>Automatic launch of and connection to auxiliary services, like <a href="https://github.com/jwilder/nginx-proxy">nginx</a>- or <a href="https://xdebug.org/docs-dbgp.php#just-in-time-debugging-and-debugger-proxies">XDebug</a> proxies.</li>
+</ul>
+
+<h3>
+<a id="example-use-cases" class="anchor" href="#example-use-cases" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Example use cases:</h3>
+
+<ul>
+<li>Your local development workstation, hosting multiple different projects built on the same framework, and therefore requiring similar infrastructure and setup steps.</li>
+<li>A staging server running multiple versions of the same project, doing fast upgrade testing by using volume snapshots.</li>
+<li>A continuous integration server, running automatic tests on pull requests.</li>
+</ul>
+
+<h2>
+<a id="installation" class="anchor" href="#installation" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Installation</h2>
+
+<p><code>dork-compose</code> uses the same installation procedures as <a href="https://docs.docker.com/compose/">docker-compose</a>.
+Either using pip:</p>
+
+<pre><code>$ pip install dork-compose
+</code></pre>
+
+<p>Or by installing it as a container itself.</p>
+
+<div class="highlight highlight-source-shell"><pre>$ curl -L https://raw.githubusercontent.com/iamdork/compose/master/run.sh <span class="pl-k">&gt;</span> /usr/local/bin/dork-compose
+$ chmod +x /usr/local/bin/dork-compose</pre></div>
+
+<h2>
+<a id="plugins" class="anchor" href="#plugins" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Plugins</h2>
+
+<p>Everything <code>dork-compose</code> does additionally to <code>docker-compose</code> is implemented using plugins. The <code>DORK_PLUGINS</code> environment variable controls which plugins are loaded and in which order they are executed. Plugins are able to alter environment variables, modify the configuration from <code>docker-compose.yml</code> and act on certain events throughout the <code>docker-compose</code> command processes.</p>
+
+<p>By default the <code>DORK_PLUGINS</code> variable looks like this:</p>
+
+<pre><code>lib:multi:git:filesystem:proxy
+</code></pre>
+
+<p>That's the default workstation setup. Plugins are executed from left to right. If two plugins to the same, the right one wins.
+Let's run through this example:</p>
+
+<ul>
+<li><p><strong>lib:</strong> If there is a <code>DORK_LIBRARY</code> environment variable that contains a valid directory, <code>dork-compose</code> will assume the <code>docker-compose.yml</code> is there. The current application sources will be added to the <code>Dockerfile</code> build context automatically.</p></li>
+<li><p><strong>multi:</strong> Multiple different projects. The project name will be the name of the containing directory. It is used to prefix snapshots and build the domain.</p></li>
+<li><p><strong>git:</strong> Git repository information is used to handle automatic <em>save</em> and <em>load</em> of snapshots. Handy for frequent branch switchers.</p></li>
+<li><p><strong>filesystem:</strong> Implements snapshots as plain filesystem copy operations. Not particularly fast or disk space economic, but works out of the box everywhere.</p></li>
+<li><p><strong>proxy:</strong> Spins up a proxy service that serves your project at <a href="http://project.127.0.0.1.xip.io">http://project.127.0.0.1.xip.io</a>.</p></li>
+</ul>
+
+<p>There are no configuration files. Plugins can be configured using environment variables, which you define in your shell environment for by using the <strong>env</strong> plugin. For a complete list of plugins and their options please refer to [Appendix: Plugins][]. For an in-action example of these plugins, please refer to the <a href="https://github.com/iamdork/examples/tree/master/drupal-simple">drupal-simple</a> in the <a href="https://github.com/iamdork/examples">examples repository</a>.</p>
+
+<h3>
+<a id="custom-plugins" class="anchor" href="#custom-plugins" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Custom plugins</h3>
+
+<p>It's possible to create and load custom plugins. Simply create a Python file with one class called <em>Plugin</em> that extends <code>dork_compose.plugin.Plugin</code> and attach it to the <code>DORK_PLUGINS</code> variable:</p>
+
+<pre><code>env:lib:multi:git:filesystem:proxy:my_plugin=~/path/to/myplugin.py
+</code></pre>
+
+<p>For example plugins have a look at the <code>plugins</code> directory inside the <code>dork-compose</code> source.</p>
+
+<h2>
+<a id="snapshots" class="anchor" href="#snapshots" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Snapshots</h2>
+
+<p><code>dork-compose</code> is able to create snapshots of all data volumes used in a compose project. This is done by using the additional <code>dork-compose snapshot</code> command.
+For an example of how to work with snapshots, please refer to the <em>drupal-simple</em> example in the <a href="https://github.com/iamdork/examples">examples repository</a>.</p>
+
+<h3>
+<a id="projects--instances" class="anchor" href="#projects--instances" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Projects &amp; Instances</h3>
+
+<p>Snapshots are organized in  <em>projects</em> and <em>instances</em>. <code>dork-compose</code> assumes that instances of the same project are compatible. Aside from building the proxy domain, the major purpose is to restrict snapshots to be used by instances of the same project only.</p>
+
+<p>The current <em>project</em> and <em>instance</em> is determined by plugins (like <em>multi</em> in the default setup) or by the <code>DORK_PROJECT</code> and <code>DORK_INSTANCE</code> environment variables.</p>
+
+<h3>
+<a id="automatic-snapshots" class="anchor" href="#automatic-snapshots" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Automatic snapshots</h3>
+
+<p>If the snapshot identifier is omitted from the <code>snapshot save</code> and <code>snapshot load</code> command, <code>dork-compose</code> will rely on plugins to provide one. The <strong>git</strong> plugin in the default setup for example will store snapshots by the current HEAD hash and will try to load the closest available ancestor to the current checkout. This avoids breaking your development database by switching between feature branches.</p>
+
+<h2>
+<a id="appendix-plugins" class="anchor" href="#appendix-plugins" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Appendix: Plugins</h2>
+
+<p><em>TODO: explain all builtin plugins.</em></p>
+      </section>
+    </div>
+
+    
+  </body>
+</html>
