@@ -72,7 +72,7 @@ class Plugin(dork_compose.plugin.Plugin):
 
     @property
     def proxy_domain(self):
-        return self.env.get('DORK_PROXY_DOMAIN', 'dork')
+        return self.env.get('DORK_PROXY_DOMAIN', 'dork.io')
 
     @property
     def letsencrypt_email(self):

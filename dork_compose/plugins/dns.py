@@ -10,13 +10,21 @@ class Plugin(dork_compose.plugin.Plugin):
 
     def environment(self):
         return {
-            'DORK_DNS_PORT': "53",
-            'DORK_PROXY_DOMAIN': "dork",
+            'DORK_DNS_PORT': self.dns_port,
+            'DORK_PROXY_DOMAIN': self.proxy_domain,
         }
 
     @property
     def auxiliary_project(self):
         return pkg_resources.resource_filename('dork_compose', 'auxiliary/dns')
+
+    @property
+    def proxy_domain(self):
+        return self.env.get('DORK_PROXY_DOMAIN', 'dork.io')
+
+    @property
+    def dns_port(self):
+        return self.env.get('DORK_DNS_PORT', '53')
 
     def initializing(self, project, service_names=None):
         if platform.system() == "Darwin":
