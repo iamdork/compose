@@ -61,4 +61,5 @@ class Plugin(dork_compose.plugin.Plugin):
 
     def cleanup(self):
         for dorkerfile in self.dorkerfiles:
-            os.remove(dorkerfile)
+            if os.path.isfile(dorkerfile):
+                os.remove(dorkerfile)
