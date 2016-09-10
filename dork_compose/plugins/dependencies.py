@@ -27,7 +27,7 @@ class Plugin(dork_compose.plugin.Plugin):
         volumes = client.volumes({'dangling': True})
         if not volumes:
             return
-        for volume in volumes:
+        for volume in volumes['Volumes']:
             client.remove_volume(volume['Name'])
 
     def initialized(self, project, containers=None):
