@@ -57,10 +57,11 @@ def load(plugins):
 
     os.environ.update(environment)
 
-    yield instances
-
-    for instance in instances:
-        instance.cleanup()
+    try:
+        yield instances
+    finally:
+        for instance in instances:
+            instance.cleanup()
 
 
 class Plugin(object):
