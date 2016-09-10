@@ -26,7 +26,7 @@ load common
   dork-compose exec web sh -c "echo \"Another Test\" > /usr/share/nginx/html/index.html"
   get filesystem.dork | grep "Another Test"
 
-  dork-compose snapshot load test
+  sudo dork-compose snapshot load test
   sleep 1
 
   get filesystem.dork | grep "Test"
