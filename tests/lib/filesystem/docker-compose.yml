@@ -1,0 +1,12 @@
+version: '2'
+
+volumes:
+  data:
+
+services:
+  web:
+    image: nginx
+    ports:
+    - 80:80
+    volumes:
+    - data:/usr/share/nginx/html
