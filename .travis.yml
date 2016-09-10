@@ -14,5 +14,7 @@ before_install:
   # Kill everything that claims port 53 and 80, so they are free for sure.
   - ./travis/clear-ports.sh
 
-install: "pip install -e ."
+install:
+- "pip install -e ."
+- "sudo pip install -e ."
 script: cd tests; bats tests
