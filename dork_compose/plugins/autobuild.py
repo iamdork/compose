@@ -37,7 +37,10 @@ class Plugin(dork_compose.plugin.Plugin):
             dockerfile = service.options.get('build', {}).get('dockerfile', None)
             args = service.options.get('build', {}).get('args', {})
 
-            onbuild = "autobuild/%s:%s-onbuild" % (self.project, service.name)
+            onbuild = "%s/%s:autobuild" % (
+                os.path.basename(self.env.get('DORK_LIBRARY', self.project)),
+                service.name
+            )
 
             build_output = service.client.build(
                 path=context,
