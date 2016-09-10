@@ -42,6 +42,11 @@ class Plugin(dork_compose.plugin.Plugin):
                     dst = '/'.join([source, dsource, path])
                     print "Synching %s to %s." % (src, dst)
 
+                    try:
+                        image = container.client.inspect_image('iamdork/rsync')
+                    except APIError:
+                        container.client.pull('iamdork/rsync')
+
                     sync = container.client.create_container(
                         image='iamdork/rsync',
                         volumes=['/destination'],
