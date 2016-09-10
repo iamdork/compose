@@ -23,8 +23,7 @@ load common
   dork-compose up -d --build
 
   sleep 1
-  # Test if the container is accessible.
-  get a--autobuild.dork/sub/ | grep '404'
+  curl --resolve a--autobuild.dork:80:127.0.0.1 http://a--autobuild.dork/sub | grep '404'
 
   dork-compose down
 }
@@ -37,8 +36,8 @@ load common
 
   sleep 1
   # Test if the container is accessible.
-  get a--autobuild.dork/vendor/ | grep '404'
-  get b--autobuild.dork/vendor/ | grep '404'
+  curl --resolve a--autobuild.dork:80:127.0.0.1 http://a--autobuild.dork/vendor | grep '404'
+  curl --resolve b--autobuild.dork:80:127.0.0.1 http://b--autobuild.dork/vendor | grep '404'
 
   dork-compose down
 }
