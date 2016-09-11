@@ -22,14 +22,6 @@ class Plugin(dork_compose.plugin.Plugin):
         for dep in deps:
             service.options['volumes'].append(VolumeSpec.parse('%s/%s' % (root, dep)))
 
-    def cleanup(self):
-        client = from_env()
-        volumes = client.volumes({'dangling': True})
-        if not volumes or not volumes['Volumes']:
-            return
-        for volume in volumes['Volumes']:
-            client.remove_volume(volume['Name'])
-
     def initialized(self, project, containers=None):
         source = self.env.get('DORK_SOURCE')
         for container in containers:
