@@ -67,16 +67,16 @@ class Plugin(dork_compose.plugin.Plugin):
     def snapshot_load(self, snapshots=(), volumes=()):
         options = list(set(self.snapshot_ls()) & set(snapshots))
         client = from_env()
+        try:
+            client.inspect_image('iamdork/rsync')
+        except APIError:
+            client.pull('iamdork/rsync')
         if len(options):
             name = options[-1]
 
             snapshot = '%s/%s' % (self.snapshot, name)
 
             for v in volumes:
-                try:
-                    client.inspect_image('iamdork/rsync')
-                except APIError:
-                    client.pull('iamdork/rsync')
 
                 sync = client.create_container(
                     image='iamdork/rsync',
@@ -94,12 +94,25 @@ class Plugin(dork_compose.plugin.Plugin):
         return None
 
     def snapshot_rm(self, snapshots=()):
+        client = from_env()
+        try:
+            client.inspect_image('alpine:3.4')
+        except APIError:
+            client.pull('alpine:3.4')
         for name in snapshots:
-            snapshot = '%s/%s' % (self.snapshot, name)
-            # Remove the current snapshot, if one exists.
-            if os.path.exists(snapshot):
-                shutil.rmtree(snapshot)
-                yield name
+            container = client.create_container(
+                command='rm -rf /snapshots/%s' % name,
+                image='alpine:3.4',
+                volumes=['/snapshots'],
+                host_config=client.create_host_config(binds=[
+                    '%s:/snapshots' % self.snapshot,
+                ]),
+            )
+
+            client.start(container)
+            while client.inspect_container(container)['State']['Running']:
+                time.sleep(0.1)
+            yield name
 
     def snapshot_ls(self):
         return [path for path in os.listdir(self.snapshot)]
