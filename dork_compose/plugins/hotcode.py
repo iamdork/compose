@@ -7,8 +7,11 @@ from docker.errors import APIError
 class Plugin(dork_compose.plugin.Plugin):
 
     def get_hotcode_volumes(self, image):
-        root = image.get('Config', {}).get('Labels', {}).get('dork.root')
-        source = image.get('Config', {}).get('Labels', {}).get('dork.source', '.')
+        root = None
+        source = '.'
+        if image.get('Config', {}).get('Labels'):
+            root = image.get('Config', {}).get('Labels', {}).get('dork.root')
+            source = image.get('Config', {}).get('Labels', {}).get('dork.source', '.')
         if not root:
             return []
 
@@ -41,13 +44,16 @@ class Plugin(dork_compose.plugin.Plugin):
             client = from_env()
             if 'image' not in service:
                 continue
+
             try:
                 image = client.inspect_image(service['image'])
-                if 'volumes' not in service:
-                    service['volumes'] = []
-                service['volumes'] = self.get_hotcode_volumes(image) + service['volumes']
             except APIError:
-                pass
+                client.pull(service['image'])
+                image = client.inspect_image(service['image'])
+
+            if 'volumes' not in service:
+                service['volumes'] = []
+            service['volumes'] = self.get_hotcode_volumes(image) + service['volumes']
 
 
 

@@ -14,7 +14,9 @@ class Plugin(dork_compose.plugin.Plugin):
         except APIError:
             return
 
-        root = image.get('Config', {}).get('Labels', {}).get('dork.root', None)
+        root = None
+        if image.get('Config', {}).get('Labels'):
+            root = image.get('Config', {}).get('Labels', {}).get('dork.root', None)
         if not root:
             return
 

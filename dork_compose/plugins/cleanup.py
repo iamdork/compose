@@ -16,4 +16,4 @@ class Plugin(dork_compose.plugin.Plugin):
         images = client.images(filters={'dangling': True})
         if images:
             for image in images:
-                client.remove_image(image['Id'])
+                client.remove_image(image['Id'], force=True)
