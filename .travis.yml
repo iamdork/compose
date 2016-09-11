@@ -16,5 +16,4 @@ before_install:
 
 install:
 - "pip install -e ."
-- "sudo pip install -e ."
 script: cd tests; bats tests

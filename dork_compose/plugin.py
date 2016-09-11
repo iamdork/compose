@@ -136,14 +136,14 @@ class Plugin(object):
     def removed(self, project, include_volumes=False):
         pass
 
-    def snapshot_save(self, snapshots=()):
+    def snapshot_save(self, snapshots=(), volumes=()):
         """
         Save the current volumes under the names provided.
         :type snapshots: list[str]
         """
         pass
 
-    def snapshot_load(self, snapshots=()):
+    def snapshot_load(self, snapshots=(), volumes=()):
         """
         Try to load the snapshots provided. If multiple snapshots are requested
         the last valid one should be used.

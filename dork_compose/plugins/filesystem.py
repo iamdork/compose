@@ -1,7 +1,11 @@
 import dork_compose.plugin
 import os
 import shutil
+
+import time
 from compose.config.config import VolumeSpec
+from docker.client import from_env
+from docker.errors import APIError
 
 
 class Plugin(dork_compose.plugin.Plugin):
@@ -35,42 +39,58 @@ class Plugin(dork_compose.plugin.Plugin):
         if not os.path.exists(dir):
             os.makedirs(dir)
 
-    def preprocess_config(self, config):
-        for service in config.services:
-            if 'volumes' in service:
-                for index, volume in enumerate(service['volumes']):
-                    if volume.is_named_volume:
-                        service['volumes'][index] = VolumeSpec.parse('%s/%s:%s' % (
-                            self.volume,
-                            volume.external,
-                            volume.internal
-                        ))
-
-        for key in config.volumes.keys():
-            del config.volumes[key]
-
-    def removed(self, project, include_volumes=None):
-        if include_volumes:
-            shutil.rmtree(self.volume, ignore_errors=True)
-
-    def snapshot_save(self, snapshots=()):
+    def snapshot_save(self, snapshots=(), volumes=()):
+        client = from_env()
         for name in snapshots:
-            snapshot = '%s/%s' % (self.snapshot, name)
-            # Remove the current snapshot, if one exists.
-            shutil.rmtree(snapshot, ignore_errors=True)
-            # Copy the volumes directory to the
-            shutil.copytree(self.volume, snapshot, symlinks=True, ignore=lambda *args, **kwargs: ['.git'])
 
-    def snapshot_load(self, snapshots=()):
+            snapshot = '%s/%s' % (self.snapshot, name)
+
+            for v in volumes:
+                try:
+                    client.inspect_image('iamdork/rsync')
+                except APIError:
+                    client.pull('iamdork/rsync')
+
+                sync = client.create_container(
+                    image='iamdork/rsync',
+                    volumes=['/destination', '/source'],
+                    host_config=client.create_host_config(binds=[
+                        '%s/%s:/destination' % (snapshot, v),
+                        '%s:/source' % volumes[v].full_name
+                    ]),
+                )
+
+                client.start(sync)
+                while client.inspect_container(sync)['State']['Running']:
+                    time.sleep(0.1)
+
+    def snapshot_load(self, snapshots=(), volumes=()):
         options = list(set(self.snapshot_ls()) & set(snapshots))
+        client = from_env()
         if len(options):
             name = options[-1]
+
             snapshot = '%s/%s' % (self.snapshot, name)
-            # Remove the current volume directory.
-            shutil.rmtree(self.volume, ignore_errors=True)
-            # Copy the snapshot as new volume.
-            shutil.copytree(snapshot, self.volume, symlinks=True, ignore=lambda *args, **kwargs: ['.git'])
-            return name
+
+            for v in volumes:
+                try:
+                    client.inspect_image('iamdork/rsync')
+                except APIError:
+                    client.pull('iamdork/rsync')
+
+                sync = client.create_container(
+                    image='iamdork/rsync',
+                    volumes=['/destination', '/source'],
+                    host_config=client.create_host_config(binds=[
+                        '%s/%s:/source' % (snapshot, v),
+                        '%s:/destination' % volumes[v].full_name
+                    ]),
+                )
+
+                client.start(sync)
+                while client.inspect_container(sync)['State']['Running']:
+                    time.sleep(0.1)
+                return name
         return None
 
     def snapshot_rm(self, snapshots=()):

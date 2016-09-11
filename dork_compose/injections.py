@@ -242,7 +242,7 @@ class DorkProject(Project, Pluggable):
         # Invoke plugin save hooks with collected names.
         self.stop()
         for plugin in self.plugins:
-            plugin.snapshot_save(names)
+            plugin.snapshot_save(names, self.volumes.volumes)
         self.start()
 
     def snapshot_load(self, names=()):
@@ -256,7 +256,7 @@ class DorkProject(Project, Pluggable):
 
         self.stop()
         for plugin in reversed(self.plugins):
-            loaded = plugin.snapshot_load(names)
+            loaded = plugin.snapshot_load(names, self.volumes.volumes)
             if loaded:
                 print(loaded)
                 break
