@@ -1,6 +1,5 @@
 import dork_compose.plugin
 import time
-from docker.client import from_env
 from compose.config.config import VolumeSpec
 
 from docker.errors import APIError

@@ -1,7 +1,7 @@
 import dork_compose.plugin
 from compose.config.config import VolumeSpec
 from docker.client import from_env
-from docker.errors import APIError
+from docker.errors import APIError, NotFound
 
 
 class Plugin(dork_compose.plugin.Plugin):
@@ -38,22 +38,6 @@ class Plugin(dork_compose.plugin.Plugin):
         for v in self.get_hotcode_volumes(image):
             if v.external not in externals:
                 service.options['volumes'].append(v)
-
-    def preprocess_config(self, config):
-        for service in config.services:
-            client = from_env()
-            if 'image' not in service:
-                continue
-
-            try:
-                image = client.inspect_image(service['image'])
-            except APIError:
-                client.pull(service['image'])
-                image = client.inspect_image(service['image'])
-
-            if 'volumes' not in service:
-                service['volumes'] = []
-            service['volumes'] = self.get_hotcode_volumes(image) + service['volumes']
 
 
 
