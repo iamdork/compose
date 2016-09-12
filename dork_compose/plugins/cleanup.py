@@ -10,10 +10,16 @@ class Plugin(dork_compose.plugin.Plugin):
         volumes = client.volumes({'dangling': True})
         if volumes and volumes['Volumes']:
             for volume in volumes['Volumes']:
-                client.remove_volume(volume['Name'])
+                try:
+                    client.remove_volume(volume['Name'])
+                except Exception:
+                    pass
 
         # Remove unused images.
         images = client.images(filters={'dangling': True})
         if images:
             for image in images:
-                client.remove_image(image['Id'], force=True)
+                try:
+                    client.remove_image(image['Id'], force=True)
+                except Exception:
+                    pass
