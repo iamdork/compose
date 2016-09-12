@@ -1,22 +1,31 @@
 sudo: required
 language: python
+
 python:
 - '2.7'
+
 services:
 - docker
+
 before_install:
 - sudo add-apt-repository ppa:duggan/bats --yes
 - sudo apt-get update -qq
 - sudo apt-get install -qq bats
 - ./travis/clear-ports.sh
+
 install:
 - pip install -e .
+
 script: cd tests; bats tests
+
+before_deploy:
+- cd ..
+
 deploy:
   provider: pypi
   user: pmelab
   password:
     secure: cN5rQywYgBaasNPjIoaUSThpqHALI4Q7LklGhAxgH8QZQzlSWDK8Mj/E4EHqTy3e51GQI4TwiRMfcrQmcmVUbOKVPF4isX/sxXwfErCG2XV/FFPGl5IHGqJ9CP5i22A+aSTJbpInQEss/nsaXYo+hiJm9/fK8kTqSmS4fhLTO3JU7VcsMqC4hCrfi6q2j5XQAlwMhbzT1RmZVeWz8jLR7oUZ02ZWnLxAPO1wStdogv5O5+TTMOU3029ZitUscTdQN/Zq5tlNeNR7sOGjBTDFpTpmuKH0dM0EFbu5HAGgm8du77qNAWIXwIPngqGdN0XvEQQZHOOnzokJ5SJU6bGmBNi/q6/L73x17A3plwLerIx2aoJQxWPTEraSsFvffNV19CUqxO/8hoynUeS1RYgSs15AsqUX9eCts5rmG2ctPda6Oc0Ug3DSMeBnY+b2b81DUYCcpy1/dQ3uO1UsbxvLka6U2r6odUWqozI/FVnSzGSKWO5NeNRMPIp32p/FfxE1UXd0viKuFKT8eGSyZj6WsoDqK9O3kC3s6yQEkBhh54AoPBXdFU/XlRozzcdBstLcnuUO9CAUS3w5fTpmLUj6M0dDpJM60eAz9x1mE5j65QQIieBdikpVNWSW0LHfKBt9ZakCkecsnfoufZjpewYD3ORZN++M9aYc+N9kGypvVRY=
   on:
-    distributions: sdist bdist_wheel
+    distributions: sdist
     repo: iamdork/compose
