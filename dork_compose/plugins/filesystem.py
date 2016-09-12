@@ -46,7 +46,7 @@ class Plugin(dork_compose.plugin.Plugin):
             snapshot = '%s/%s' % (self.snapshot, name)
 
             for v in volumes:
-                print "Restoring volume %s to %s/%s." % (v, snapshot, v)
+                print "Saving volume %s to %s/%s." % (v, snapshot, v)
                 try:
                     client.inspect_image('iamdork/rsync')
                 except APIError:
