@@ -46,6 +46,7 @@ class Plugin(dork_compose.plugin.Plugin):
             snapshot = '%s/%s' % (self.snapshot, name)
 
             for v in volumes:
+                print "Restoring volume %v to %s/%s." % (v, snapshot, v)
                 try:
                     client.inspect_image('iamdork/rsync')
                 except APIError:
@@ -63,6 +64,7 @@ class Plugin(dork_compose.plugin.Plugin):
                 client.start(sync)
                 while client.inspect_container(sync)['State']['Running']:
                     time.sleep(0.1)
+                client.remove_container(sync)
 
     def snapshot_load(self, snapshots=(), volumes=()):
         options = list(set(self.snapshot_ls()) & set(snapshots))
@@ -77,7 +79,7 @@ class Plugin(dork_compose.plugin.Plugin):
             snapshot = '%s/%s' % (self.snapshot, name)
 
             for v in volumes:
-
+                print "Restoring volume %v from %s/%s." % (v, snapshot, v)
                 sync = client.create_container(
                     image='iamdork/rsync',
                     volumes=['/destination', '/source'],
@@ -90,6 +92,7 @@ class Plugin(dork_compose.plugin.Plugin):
                 client.start(sync)
                 while client.inspect_container(sync)['State']['Running']:
                     time.sleep(0.1)
+                client.remove_container(sync)
                 return name
         return None
 
@@ -112,6 +115,7 @@ class Plugin(dork_compose.plugin.Plugin):
             client.start(container)
             while client.inspect_container(container)['State']['Running']:
                 time.sleep(0.1)
+            client.remove_container(container)
             yield name
 
     def snapshot_ls(self):
