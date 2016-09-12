@@ -46,7 +46,7 @@ class Plugin(dork_compose.plugin.Plugin):
             snapshot = '%s/%s' % (self.snapshot, name)
 
             for v in volumes:
-                print "Restoring volume %v to %s/%s." % (v, snapshot, v)
+                print "Restoring volume %s to %s/%s." % (v, snapshot, v)
                 try:
                     client.inspect_image('iamdork/rsync')
                 except APIError:
@@ -79,7 +79,7 @@ class Plugin(dork_compose.plugin.Plugin):
             snapshot = '%s/%s' % (self.snapshot, name)
 
             for v in volumes:
-                print "Restoring volume %v from %s/%s." % (v, snapshot, v)
+                print "Restoring volume %s from %s/%s." % (v, snapshot, v)
                 sync = client.create_container(
                     image='iamdork/rsync',
                     volumes=['/destination', '/source'],
