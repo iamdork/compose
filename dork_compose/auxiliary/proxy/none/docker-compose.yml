@@ -2,7 +2,8 @@ version: '2'
 
 services:
   nginx:
-    image: nginx
+    image: iamdork/nginx-proxy
+    build: ../nginx
     labels:
     - org.iamdork.auxiliary
     ports:
