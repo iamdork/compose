@@ -93,7 +93,7 @@ class Plugin(dork_compose.plugin.Plugin):
                 while client.inspect_container(sync)['State']['Running']:
                     time.sleep(0.1)
                 client.remove_container(sync)
-                return name
+            return name
         return None
 
     def snapshot_rm(self, snapshots=()):
