@@ -59,8 +59,8 @@ class Plugin(dork_compose.plugin.Plugin):
                 value = self.env.get(secret)
                 if not value:
                     raise ValueError("Environment variable %s required as secret is not defined." % secret)
-                if os.path.isfile(value):
-                    with open(value, 'r') as f:
+                if os.path.isfile(os.path.expanduser(value)):
+                    with open(os.path.expanduser(value), 'r') as f:
                         value = f.read()
                 client.write('secret/%s' % secret, value=value)
             service.options['build']['args']['VAULT_TOKEN'] = token
