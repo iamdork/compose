@@ -1,9 +1,7 @@
 import dork_compose.plugin
 import os
-import shutil
 
 import time
-from compose.config.config import VolumeSpec
 from docker.client import from_env
 from docker.errors import APIError
 
@@ -61,10 +59,12 @@ class Plugin(dork_compose.plugin.Plugin):
                     ]),
                 )
 
-                client.start(sync)
-                while client.inspect_container(sync)['State']['Running']:
-                    time.sleep(0.1)
-                client.remove_container(sync)
+                try:
+                    client.start(sync)
+                    while client.inspect_container(sync)['State']['Running']:
+                        time.sleep(0.5)
+                finally:
+                    client.remove_container(sync)
 
     def snapshot_load(self, snapshots=(), volumes=()):
         options = list(set(self.snapshot_ls()) & set(snapshots))
@@ -89,10 +89,12 @@ class Plugin(dork_compose.plugin.Plugin):
                     ]),
                 )
 
-                client.start(sync)
-                while client.inspect_container(sync)['State']['Running']:
-                    time.sleep(0.1)
-                client.remove_container(sync)
+                try:
+                    client.start(sync)
+                    while client.inspect_container(sync)['State']['Running']:
+                        time.sleep(0.5)
+                finally:
+                    client.remove_container(sync)
             return name
         return None
 
@@ -112,10 +114,12 @@ class Plugin(dork_compose.plugin.Plugin):
                 ]),
             )
 
-            client.start(container)
-            while client.inspect_container(container)['State']['Running']:
-                time.sleep(0.1)
-            client.remove_container(container)
+            try:
+                client.start(container)
+                while client.inspect_container(container)['State']['Running']:
+                    time.sleep(0.5)
+            finally:
+                client.remove_container(container)
             yield name
 
     def snapshot_ls(self):

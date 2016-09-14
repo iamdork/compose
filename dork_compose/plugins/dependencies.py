@@ -52,10 +52,11 @@ class Plugin(dork_compose.plugin.Plugin):
                         }
                     )
 
-                    container.client.start(sync, volumes_from=container.id)
-                    while container.client.inspect_container(sync)['State']['Running']:
-                        time.sleep(0.1)
-
-                    container.client.remove_container(sync)
+                    try:
+                        container.client.start(sync, volumes_from=container.id)
+                        while container.client.inspect_container(sync)['State']['Running']:
+                            time.sleep(0.5)
+                    finally:
+                        container.client.remove_container(sync)
 
 
