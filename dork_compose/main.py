@@ -1,4 +1,5 @@
 import os
+import sys
 from functools import partial
 
 
@@ -9,6 +10,7 @@ import compose.config.validation
 import compose.project
 import compose.cli.command
 import compose.cli.main
+from compose.cli.docopt_command import NoSuchCommand
 
 from injections import DorkTopLevelCommand, get_dork_project, get_dork_project_name, dork_config_load, dork_validate_against_config_schema, dork_validate_service_constraints
 from compose.config.environment import env_vars_from_file
@@ -23,7 +25,13 @@ DEFAULT_PLUGINS = 'env:multi:lib:autobuild:hotcode:dependencies:git:filesystem:p
 
 def run():
 
-    with plugin.load(os.getenv('DORK_PLUGINS', DEFAULT_PLUGINS)) as plugins:
+    command = None
+    try:
+        command = compose.cli.main.dispatch().args[1].__name__
+
+    except NoSuchCommand:
+        pass
+    with plugin.load(os.getenv('DORK_PLUGINS', DEFAULT_PLUGINS), command) as plugins:
 
         # Override all occurences of config schema related functions.
         compose.config.config.validate_against_config_schema = partial(dork_validate_against_config_schema, plugins)

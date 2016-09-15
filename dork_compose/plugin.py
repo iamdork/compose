@@ -14,7 +14,7 @@ import filelock
 
 
 @contextlib.contextmanager
-def load(plugins):
+def load(plugins, command):
     instances = []
 
     environment = {
@@ -36,7 +36,7 @@ def load(plugins):
 
         try:
             execfile(os.path.expanduser(f), local)
-            instances.append(local['Plugin'](environment.copy(), plugin))
+            instances.append(local['Plugin'](environment.copy(), plugin, command))
             environment.update(instances[-1].environment())
         except Exception as ex:
             logger = logging.getLogger('dork')
@@ -70,7 +70,7 @@ class Plugin(object):
     process.
     """
 
-    def __init__(self, env, name):
+    def __init__(self, env, name, command):
         self.name = name
         self.env = env.copy()
         self.log = logging.getLogger(__name__)

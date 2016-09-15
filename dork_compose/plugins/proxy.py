@@ -10,8 +10,8 @@ from subprocess import check_call
 
 class Plugin(dork_compose.plugin.Plugin):
 
-    def __init__(self, env, name):
-        dork_compose.plugin.Plugin.__init__(self, env, name)
+    def __init__(self, env, name, command):
+        dork_compose.plugin.Plugin.__init__(self, env, name, command)
         self.auth = self.collect_auth_files()
 
     def environment(self):

@@ -11,8 +11,8 @@ from docker.errors import NotFound
 
 class Plugin(dork_compose.plugin.Plugin):
 
-    def __init__(self, env, name):
-        super(Plugin, self).__init__(env, name)
+    def __init__(self, env, name, command):
+        super(Plugin, self).__init__(env, name, command)
         self.clean_paths = []
 
     def alter_config_schema(self, schema):

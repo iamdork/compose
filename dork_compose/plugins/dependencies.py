@@ -7,6 +7,11 @@ from docker.errors import APIError
 
 class Plugin(dork_compose.plugin.Plugin):
 
+    def __init__(self, env, name, command):
+        if command == 'run':
+            raise StandardError('Skip dependencies plugin on "run" command.')
+        super(Plugin, self).__init__(env, name, command)
+
     def creating_container(self, service):
         try:
             image = service.client.inspect_image(service.image_name)
