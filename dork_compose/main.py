@@ -26,11 +26,16 @@ DEFAULT_PLUGINS = 'env:multi:lib:autobuild:hotcode:dependencies:git:filesystem:p
 def run():
 
     command = None
+
+    # Replace compose TopLevelCommand with custom derivation with additional
+    # commands.
+    compose.cli.main.TopLevelCommand = DorkTopLevelCommand
+
     try:
         command = compose.cli.main.dispatch().args[1].__name__
-
     except NoSuchCommand:
         pass
+
     with plugin.load(os.getenv('DORK_PLUGINS', DEFAULT_PLUGINS), command) as plugins:
 
         # Override all occurences of config schema related functions.
@@ -40,10 +45,6 @@ def run():
 
         # Inject configuration hooks.
         compose.config.config.load = partial(dork_config_load, plugins)
-
-        # Replace compose TopLevelCommand with custom derivation with additional
-        # commands.
-        compose.cli.main.TopLevelCommand = DorkTopLevelCommand
 
         # Inject custom get_dork_project to replace instances with DorkProjects.
         compose.cli.command.get_project = partial(get_dork_project, plugins)
