@@ -7,7 +7,7 @@ import os
 class Plugin(dork_compose.plugin.Plugin):
 
     def __init__(self, env, name, command):
-        dork_compose.plugin.Plugin.__init__(self, env, name)
+        dork_compose.plugin.Plugin.__init__(self, env, name, command)
         self.tokens = []
 
     def environment(self):
