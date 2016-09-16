@@ -1,2 +1,1 @@
-include dork_compose/auxiliary/proxy/docker-compose.yml
-include dork_compose/auxiliary/dbgp/docker-compose.yml
+recursive-include dork_compose/auxiliary
