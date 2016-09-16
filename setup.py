@@ -58,7 +58,11 @@ setup(
     # You can just specify the packages manually here if your project is
     # simple. Or you can use find_packages().
     packages=find_packages(exclude=['contrib', 'docs', 'tests*']),
-    package_data={'dork_compose': ['plugins/*.py', 'auxiliary/proxy/docker-compose.yml']},
+    package_data={'dork_compose': [
+        'plugins/*.py',
+        'auxiliary/*',
+        'auxiliary/*/*',
+    ]},
 
     # List run-time dependencies here.  These will be installed by pip when
     # your project is installed. For an analysis of "install_requires" vs pip's
