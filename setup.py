@@ -62,6 +62,7 @@ setup(
         'plugins/*.py',
         'auxiliary/*',
         'auxiliary/*/*',
+        'auxiliary/*/*/*',
     ]},
 
     # List run-time dependencies here.  These will be installed by pip when
