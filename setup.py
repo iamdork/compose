@@ -8,21 +8,18 @@ https://github.com/pypa/sampleproject
 # Always prefer setuptools over distutils
 from setuptools import setup, find_packages
 
-version = '0.1.18'
-
 setup(
     name='dork-compose',
 
     # Versions should comply with PEP440.  For a discussion on single-sourcing
     # the version across setup.py and the project code, see
     # https://packaging.python.org/en/latest/single_source_version.html
-    version=version,
+    version='1.8.0',
 
     description='docker-compose with magicks.',
 
     # The project's main homepage.
     url='https://github.com/iamdork/dork',
-    download_url='https://github.com/iamdork/dork-compose/tarball/%s' % version,
 
     # Author details
     author='Philipp Melab',
