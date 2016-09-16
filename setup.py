@@ -61,7 +61,7 @@ setup(
     package_data={'dork_compose': [
         'plugins/*.py',
         'auxiliary/*',
-        'auxiliary/*/*',
+        'auxiliary/*/docker-compose.yml',
         'auxiliary/*/*/*',
     ]},
 
