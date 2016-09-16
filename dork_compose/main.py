@@ -12,7 +12,7 @@ import compose.cli.command
 import compose.cli.main
 from compose.cli.docopt_command import NoSuchCommand
 
-from injections import DorkTopLevelCommand, get_dork_project, get_dork_project_name, dork_config_load, dork_validate_against_config_schema, dork_validate_service_constraints
+from injections import DorkTopLevelCommand, get_dork_project, get_dork_project_name, dork_config_load, dork_validate_against_config_schema, dork_validate_service_constraints, dork_perform_command
 from compose.config.environment import env_vars_from_file
 
 # Default plugins:
@@ -38,6 +38,7 @@ def run():
 
     with plugin.load(os.getenv('DORK_PLUGINS', DEFAULT_PLUGINS), command) as plugins:
 
+        compose.cli.main.perform_command = dork_perform_command
         # Override all occurences of config schema related functions.
         compose.config.config.validate_against_config_schema = partial(dork_validate_against_config_schema, plugins)
         compose.config.validate_service_constraints = partial(dork_validate_service_constraints, plugins)

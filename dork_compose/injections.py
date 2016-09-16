@@ -3,7 +3,7 @@ import re
 import os
 from compose.cli.command import get_project
 import compose.cli.command as cmd
-from compose.cli.main import TopLevelCommand
+from compose.cli.main import TopLevelCommand, perform_command
 from compose.config.config import load
 from compose.config.environment import Environment
 from compose.const import DEFAULT_TIMEOUT
@@ -19,6 +19,12 @@ from functools import partial
 from jsonschema import Draft4Validator
 from jsonschema import FormatChecker
 from jsonschema import RefResolver
+
+
+def dork_perform_command(options, handler, command_options):
+    if '--timeout' in options and not options['--timeout']:
+        options['--timeout'] = os.environ.get('DORK_DEFAULT_TIMEOUT', DEFAULT_TIMEOUT)
+    return perform_command(options, handler, command_options)
 
 
 def dork_config_load(plugins, config_details):
