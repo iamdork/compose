@@ -60,9 +60,9 @@ setup(
     packages=find_packages(exclude=['contrib', 'docs', 'tests*']),
     package_data={'dork_compose': [
         'plugins/*.py',
-        'auxiliary/*',
         'auxiliary/*/docker-compose.yml',
-        'auxiliary/*/*/*',
+        'auxiliary/*/docker-compose.yml',
+        'auxiliary/proxy/*/*',
     ]},
 
     # List run-time dependencies here.  These will be installed by pip when
