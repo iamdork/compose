@@ -1,6 +1,13 @@
 version: '2'
 services:
-  http:
+  a:
     build: web
     ports:
-    - 80:80
+    - 81:80
+
+  b:
+    build: web
+    labels:
+      dork.hotcode: ''
+    ports:
+    - 82:80
