@@ -7,6 +7,8 @@ import urlparse
 import pkg_resources
 from subprocess import check_call
 
+import logging
+log = logging.getLogger(__name__)
 
 class Plugin(dork_compose.plugin.Plugin):
 
@@ -158,14 +160,14 @@ class Plugin(dork_compose.plugin.Plugin):
                 os.makedirs(self.certs_dir)
 
             if not os.path.isfile(self.certs_dir + '/dhparam.pem'):
-                print "Creating Diffie-Hellman group. This might take a while."
+                log.info("Creating Diffie-Hellman group. This might take a while.")
                 check_call(['openssl', 'dhparam', '-out', '%s/dhparam.pem' % self.certs_dir, '2048'])
 
             key = '%s/%s.key' % (self.certs_dir, self.proxy_domain)
             crt = '%s/%s.crt' % (self.certs_dir, self.proxy_domain)
 
             if not os.path.isfile(key) or not os.path.isfile(crt):
-                print "Creating self signed key and certificate for domain '%s'." % self.proxy_domain
+                log.info("Creating self signed key and certificate for domain '%s'." % self.proxy_domain)
                 check_call([
                     'openssl', 'req', '-x509', '-nodes',
                     '-days', '365', '-newkey', 'rsa:2048',

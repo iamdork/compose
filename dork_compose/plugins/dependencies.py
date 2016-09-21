@@ -4,6 +4,8 @@ from compose.config.config import VolumeSpec
 
 from docker.errors import APIError
 
+import logging
+log = logging.getLogger(__name__)
 
 class Plugin(dork_compose.plugin.Plugin):
 
@@ -38,7 +40,7 @@ class Plugin(dork_compose.plugin.Plugin):
                 for path in deps:
                     src = '/'.join([root, path])
                     dst = '/'.join([source, dsource, path])
-                    print "Synching %s to %s." % (src, dst)
+                    log.info("Synching %s to %s." % (src, dst))
 
                     try:
                         image = container.client.inspect_image('iamdork/rsync')

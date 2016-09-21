@@ -8,9 +8,11 @@ from dork_compose.injections import dork_config_load
 from compose.const import API_VERSIONS
 from compose.project import Project
 from helpers import notdefault, tru
-import logging
 import pkg_resources
 import filelock
+
+import logging
+log = logging.getLogger(__name__)
 
 
 @contextlib.contextmanager
@@ -38,9 +40,10 @@ def load(plugins, command):
             execfile(os.path.expanduser(f), local)
             instances.append(local['Plugin'](environment.copy(), plugin, command))
             environment.update(instances[-1].environment())
+
+            log.debug('Loaded plugin %s.' % plugin)
         except Exception as ex:
-            logger = logging.getLogger('dork')
-            logger.debug('Could not load plugin %s: %s' % (plugin, ex))
+            log.warning('Could not load plugin %s: %s' % (plugin, ex))
             pass
 
     # If there is no explicit project name in the environment, set

@@ -5,6 +5,8 @@ import time
 from docker.client import from_env
 from docker.errors import APIError
 
+import logging
+log = logging.getLogger(__name__)
 
 class Plugin(dork_compose.plugin.Plugin):
 
@@ -44,7 +46,7 @@ class Plugin(dork_compose.plugin.Plugin):
             snapshot = '%s/%s' % (self.snapshot, name)
 
             for v in volumes:
-                print "Saving volume %s to %s/%s." % (v, snapshot, v)
+                log.info("Saving volume %s to %s/%s." % (v, snapshot, v))
                 try:
                     client.inspect_image('iamdork/rsync')
                 except APIError:
@@ -78,11 +80,11 @@ class Plugin(dork_compose.plugin.Plugin):
 
             snapshot = '%s/%s' % (self.snapshot, name)
             if not os.path.isdir(snapshot):
-                print "Snapshot %s of project %s doesn't exist." % (name, self.project)
+                log.error("Snapshot %s of project %s doesn't exist." % (name, self.project))
                 return
 
             for v in volumes:
-                print "Restoring volume %s from %s/%s." % (v, snapshot, v)
+                log.info("Restoring volume %s from %s/%s." % (v, snapshot, v))
                 sync = client.create_container(
                     image='iamdork/rsync',
                     volumes=['/destination', '/source'],
@@ -110,7 +112,7 @@ class Plugin(dork_compose.plugin.Plugin):
         for name in snapshots:
             snapshot = '%s/%s' % (self.snapshot, name)
             if not os.path.isdir(snapshot):
-                print "Snapshot %s of project %s doesn't exist." % (name, self.project)
+                log.error("Snapshot %s of project %s doesn't exist." % (name, self.project))
                 continue
 
             container = client.create_container(

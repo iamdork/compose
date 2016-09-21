@@ -21,6 +21,10 @@ from jsonschema import FormatChecker
 from jsonschema import RefResolver
 
 
+import logging
+log = logging.getLogger(__name__)
+
+
 def dork_perform_command(options, handler, command_options):
     if '--timeout' in options and not options['--timeout']:
         options['--timeout'] = os.environ.get('DORK_DEFAULT_TIMEOUT', DEFAULT_TIMEOUT)
@@ -135,7 +139,7 @@ class DorkTopLevelCommand(TopLevelCommand):
         table.inner_column_border = False
         table.inner_heading_row_border = False
         table.title = 'Dork status information'
-        print table.table
+        log.info(table.table)
 
 
 class Pluggable(object):
@@ -264,7 +268,7 @@ class DorkProject(Project, Pluggable):
         for plugin in reversed(self.plugins):
             loaded = plugin.snapshot_load(names, self.volumes.volumes)
             if loaded:
-                print(loaded)
+                log.info("Loaded snapshot %s through plugin %s." % (loaded, plugin.name))
                 break
         self.start()
 
@@ -276,12 +280,12 @@ class DorkProject(Project, Pluggable):
 
         for plugin in self.plugins:
             for removed in plugin.snapshot_rm(names):
-                print(removed)
+                log.info("Removed snapshot %s through plugin %s." % (removed, plugin.name))
 
     def snapshot_ls(self, snapshots=()):
         for name in self.__snapshots():
             if not snapshots or name in snapshots:
-                print(name)
+                log.info(name)
 
     def info(self):
         info = {}
