@@ -77,6 +77,9 @@ class Plugin(dork_compose.plugin.Plugin):
             name = options[-1]
 
             snapshot = '%s/%s' % (self.snapshot, name)
+            if not os.path.isdir(snapshot):
+                print "Snapshot %s of project %s doesn't exist." % (name, self.project)
+                return
 
             for v in volumes:
                 print "Restoring volume %s from %s/%s." % (v, snapshot, v)
@@ -105,6 +108,11 @@ class Plugin(dork_compose.plugin.Plugin):
         except APIError:
             client.pull('alpine:3.4')
         for name in snapshots:
+            snapshot = '%s/%s' % (self.snapshot, name)
+            if not os.path.isdir(snapshot):
+                print "Snapshot %s of project %s doesn't exist." % (name, self.project)
+                continue
+
             container = client.create_container(
                 command='rm -rf /snapshots/%s' % name,
                 image='alpine:3.4',
