@@ -139,7 +139,7 @@ class DorkTopLevelCommand(TopLevelCommand):
         table.inner_column_border = False
         table.inner_heading_row_border = False
         table.title = 'Dork status information'
-        log.info(table.table)
+        print table.table
 
 
 class Pluggable(object):
