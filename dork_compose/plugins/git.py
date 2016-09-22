@@ -7,18 +7,27 @@ class Plugin(dork_compose.plugin.Plugin):
 
     def __init__(self, env, name, command):
         dork_compose.plugin.Plugin.__init__(self, env, name, command)
-        self.__repo = Repo(self.basedir)
+        try:
+            self.__repo = Repo(self.basedir)
+        except Exception:
+            self.__repo = False
 
     def __commit(self, hash):
+        if not self.__repo:
+            return None
         try:
             return self.__repo.commit(hash)
         except BadName:
             return None
 
     def snapshot_autosave(self):
+        if not self.__repo:
+            return None
         return self.__repo.head.commit.hexsha
 
     def snapshot_autoload(self, snapshots=()):
+        if not self.__repo:
+            return None
         name = None
         head = self.__repo.head.commit
         distance = -1
@@ -31,6 +40,8 @@ class Plugin(dork_compose.plugin.Plugin):
         return name
 
     def snapshot_autoclean(self, snapshots=()):
+        if not self.__repo:
+            return None
         snapshots = filter(lambda x: x, map(self.__commit, snapshots))
         names = []
         for current in snapshots:
