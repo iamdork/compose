@@ -50,16 +50,17 @@ class Plugin(dork_compose.plugin.Plugin):
                 sync = client.create_container(
                     image='iamdork/rsync',
                     volumes=['/destination'],
-                    host_config=client.create_host_config(binds=[
-                        '%s:/destination' % dst
-                    ]),
+                    host_config=client.create_host_config(
+                        binds=['%s:/destination' % dst],
+                        volumes_from=container
+                    ),
                     environment={
                         'SOURCE': src,
                         'EXCLUDE': '.git'
                     }
                 )['Id']
                 try:
-                    client.start(sync, volumes_from=container)
+                    client.start(sync)
                     while client.inspect_container(sync)['State']['Running']:
                         time.sleep(0.5)
                 finally:
