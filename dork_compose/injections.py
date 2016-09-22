@@ -163,7 +163,13 @@ class DorkService(Service, Pluggable):
     def build(self, no_cache=False, pull=False, force_rm=False):
         for plugin in self.plugins:
             plugin.building(self, no_cache, pull, force_rm)
-        return super(DorkService, self).build(no_cache, pull, force_rm)
+
+        result = super(DorkService, self).build(no_cache, pull, force_rm)
+
+        for plugin in self.plugins:
+            plugin.after_build(self, no_cache, pull, force_rm)
+
+        return result
 
     def start_container(self, container):
         for plugin in self.plugins:

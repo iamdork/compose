@@ -121,6 +121,9 @@ class Plugin(object):
     def building(self, service, no_cache, pull, force_rm):
         pass
 
+    def after_build(self, service, no_cache, pull, force_rm):
+        pass
+
     def initializing(self, project, service_names=None):
         pass
 
