@@ -30,54 +30,100 @@ $ chmod +x /usr/local/bin/dork-compose
 
 ## Plugins
 
-Everything `dork-compose` does additionally to `docker-compose` is implemented using plugins. The `DORK_PLUGINS` environment variable controls which plugins are loaded and in which order they are executed. Plugins are able to alter environment variables, modify the configuration from `docker-compose.yml` and act on certain events throughout the `docker-compose` command processes.
+Everything `dork-compose` does additionally to `docker-compose` is implemented
+using plugins. The `DORK_PLUGINS` environment variable controls which plugins
+are loaded and in which order they are executed. Plugins are able to alter
+environment variables, modify the configuration from `docker-compose.yml` and
+act on certain events throughout the `docker-compose` command processes.
 
 By default the `DORK_PLUGINS` variable looks like this:
 
 ```
-lib:multi:git:filesystem:proxy
+env:multi:lib:autobuild:hotcode:dependencies:filesystem:proxy:dns:vault
 ```
 
-That's the default workstation setup. Plugins are executed from left to right. If two plugins to the same, the right one wins.
+That's the default workstation setup. Plugins are executed from left to right.
+If two plugins to the same, the right one wins.  
 Let's run through this example:
 
-- **lib:** If there is a `DORK_LIBRARY` environment variable that contains a valid directory, `dork-compose` will assume the `docker-compose.yml` is there. The current application sources will be added to the `Dockerfile` build context automatically.
+- **env:** Scans parent directories for `.env` or `.dork.env` files and
+  populates the environment with their contents.
+  
+- **multi:** Multiple different projects. The project name will be the name of
+  the containing directory. It is used to prefix snapshots and build the domain.
 
-- **multi:** Multiple different projects. The project name will be the name of the containing directory. It is used to prefix snapshots and build the domain.
+- **lib:** If there is a `DORK_LIBRARY` environment variable that contains a
+  valid directory, `dork-compose` will assume the `docker-compose.yml` is there.
+  The current application sources will be added to the `Dockerfile` build context
+  automatically.
+  
+- **autbuild:** Automatically includes the current source directory in the build
+  context.
 
-- **git:** Git repository information is used to handle automatic *save* and *load* of snapshots. Handy for frequent branch switchers.
+- **hotcode:** Mount code directories you work on into your local codebase.
 
-- **filesystem:** Implements snapshots as plain filesystem copy operations. Not particularly fast or disk space economic, but works out of the box everywhere.
+- **dependencies:** Syncs sources downloaded during the build process (e.g. the
+  composer `vendor` directory) to your local environment. For debugging and IDE
+  autocompletion.
 
-- **proxy:** Spins up a proxy service that serves your project at http://project.127.0.0.1.xip.io.
+- **filesystem:** Implements snapshots as plain rsync. Not particularly fast or
+  disk space economic, but works out of the box everywhere.
 
-There are no configuration files. Plugins can be configured using environment variables, which you define in your shell environment for by using the **env** plugin. For a complete list of plugins and their options please refer to [Appendix: Plugins][]. For an in-action example of these plugins, please refer to the [drupal-simple](https://github.com/iamdork/examples/tree/master/drupal-simple) in the [examples repository](https://github.com/iamdork/examples).
+- **proxy:** Spins up a proxy service that serves your project at
+  http://project.dork.io.
+  
+- **dns:** Runs a dns server and configures your system to use it. Enables you
+  to use the domain `dork.io`.
+ 
+- **vault:** Exposes secrets (e.g. the github private token) to the build
+  process without leaving any traces in the image.
+
+There are no configuration files. Plugins can be configured using environment
+variables, which you define in your shell environment for by using the **env**
+plugin. For a complete list of plugins and their options please refer to
+[Appendix: Plugins][]. For an in-action example of these plugins, please refer
+to the [drupal-simple](https://github.com/iamdork/recipes/tree/master/drupal-simple)
+in the [recipes repository](https://github.com/iamdork/recipes).
 
 
 ### Custom plugins
 
-It's possible to create and load custom plugins. Simply create a Python file with one class called *Plugin* that extends `dork_compose.plugin.Plugin` and attach it to the `DORK_PLUGINS` variable:
+It's possible to create and load custom plugins. Simply create a Python file
+with one class called *Plugin* that extends `dork_compose.plugin.Plugin` and
+attach it to the `DORK_PLUGINS` variable:
 
 ```
-env:lib:multi:git:filesystem:proxy:my_plugin=~/path/to/myplugin.py
+env:multi:lib:autobuild:hotcode:dependencies:filesystem:proxy:dns:vault:my_plugin=~/path/to/myplugin.py
 ```
 
 For example plugins have a look at the `plugins` directory inside the `dork-compose` source.
 
 ## Snapshots
 
-`dork-compose` is able to create snapshots of all data volumes used in a compose project. This is done by using the additional `dork-compose snapshot` command.
-For an example of how to work with snapshots, please refer to the *drupal-simple* example in the [examples repository](https://github.com/iamdork/examples).
+`dork-compose` is able to create snapshots of all data volumes used in a compose
+project. This is done by using the additional `dork-compose snapshot` command.
+For an example of how to work with snapshots, please refer to the
+*drupal-simple* example in the [examples repository](https://github.com/iamdork/examples).
 
 ### Projects & Instances
 
-Snapshots are organized in  *projects* and *instances*. `dork-compose` assumes that instances of the same project are compatible. Aside from building the proxy domain, the major purpose is to restrict snapshots to be used by instances of the same project only.
+Snapshots are organized in  *projects* and *instances*. `dork-compose` assumes
+that instances of the same project are compatible. Aside from building the proxy
+domain, the major purpose is to restrict snapshots to be used by instances of
+the same project only.
 
-The current *project* and *instance* is determined by plugins (like *multi* in the default setup) or by the `DORK_PROJECT` and `DORK_INSTANCE` environment variables.
+The current *project* and *instance* is determined by plugins (like *multi* in
+the default setup) or by the `DORK_PROJECT` and `DORK_INSTANCE` environment
+variables.
 
 ### Automatic snapshots
 
-If the snapshot identifier is omitted from the `snapshot save` and `snapshot load` command, `dork-compose` will rely on plugins to provide one. The **git** plugin in the default setup for example will store snapshots by the current HEAD hash and will try to load the closest available ancestor to the current checkout. This avoids breaking your development database by switching between feature branches.
+If the snapshot identifier is omitted from the `snapshot save` and
+`snapshot load` command, `dork-compose` will rely on plugins to provide one.
+The **git** plugin in the default setup for example will store snapshots by the
+current HEAD hash and will try to load the closest available ancestor to the
+current checkout. This avoids breaking your development database by switching
+between feature branches.
 
 ## Appendix: Plugins
 
