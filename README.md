@@ -2,15 +2,22 @@
 ![Build Status](https://travis-ci.org/iamdork/compose.svg?branch=master)
 
 ## What is this?
-`dork-compose` is a drop in replacement for the [docker-compose] command line tool, adding some convenience features for running multiple compose projects on the same host.
+`dork-compose` is a drop in replacement for the [docker-compose] command line
+tool, adding some convenience features for running multiple compose projects on
+the same host.
 
 - Volume snapshots with automatic versioning.
-- Separation of Docker setup (`Dockerfile` and `docker-compose.yml`) from application source code.
-- Automatic launch of and connection to auxiliary services, like [nginx](https://github.com/jwilder/nginx-proxy)- or [XDebug](https://xdebug.org/docs-dbgp.php#just-in-time-debugging-and-debugger-proxies) proxies.
+- Separation of Docker setup (`Dockerfile` and `docker-compose.yml`) from
+  application source code.
+- Automatic launch of and connection to auxiliary services, like
+  [nginx](https://github.com/jwilder/nginx-proxy) or a DNS server.
 
 ### Example use cases:
-- Your local development workstation, hosting multiple different projects built on the same framework, and therefore requiring similar infrastructure and setup steps.
-- A staging server running multiple versions of the same project, doing fast upgrade testing by using volume snapshots.
+- Your local development workstation, hosting multiple different projects built
+  on the same framework, and therefore requiring similar infrastructure and
+  setup steps.
+- A staging server running multiple versions of the same project, doing fast
+  upgrade testing by using volume snapshots.
 - A continuous integration server, running automatic tests on pull requests.
 
 
