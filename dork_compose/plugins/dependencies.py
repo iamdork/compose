@@ -28,13 +28,14 @@ class Plugin(dork_compose.plugin.Plugin):
 
         deps = filter(lambda x: x, image.get('Config', {}).get('Labels', {}).get('dork.dependencies', '').split(';'))
 
+        hotcode = []
         if service.options and service.options.get('labels'):
             hotcode = service.options\
                 .get('labels')\
                 .get('dork.hotcode', image.get('Config', {})
                      .get('Labels', {}).get('dork.hotcode', ''))
 
-        hotcode = filter(lambda x: x, hotcode.split(';'))
+            hotcode = filter(lambda x: x, hotcode.split(';'))
         hotcode.append('.git')
 
         if not (source and root and deps):
