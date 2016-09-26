@@ -17,7 +17,12 @@ class Plugin(dork_compose.plugin.Plugin):
             'VAULT_HOST': self.vault_host,
             'VAULT_BUILD_HOST': self.vault_build_host,
             'VAULT_PORT': self.vault_port,
+            'VAULT_MODE': self.vault_mode,
         }
+
+    @property
+    def vault_mode(self):
+        return self.env.get('VAULT_MODE', 'secure')
 
     @property
     def vault_version(self):
@@ -53,8 +58,13 @@ class Plugin(dork_compose.plugin.Plugin):
                 url="http://%s:%s" % (self.vault_host, self.vault_port),
                 token=self.vault_root_token
             )
-            token = client.create_token()['auth']['client_token']
-            self.tokens.append(token)
+
+            if self.vault_mode == 'secure':
+                token = client.create_token()['auth']['client_token']
+                self.tokens.append(token)
+            else:
+                token = self.vault_root_token
+
             for secret in self.vault_secrets:
                 value = self.env.get(secret)
                 if not value:
