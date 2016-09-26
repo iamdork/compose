@@ -45,8 +45,8 @@ act on certain events throughout the `docker-compose` command processes.
 
 By default the `DORK_PLUGINS` variable looks like this:
 
-```
-env:multi:lib:autobuild:hotcode:dependencies:filesystem:proxy:dns:vault
+```bash
+export DORK_PLUGINS="env:multi:lib:autobuild:hotcode:dependencies:filesystem:proxy:dns:vault"
 ```
 
 That's the default workstation setup. Plugins are executed from left to right.
@@ -99,8 +99,8 @@ It's possible to create and load custom plugins. Simply create a Python file
 with one class called *Plugin* that extends `dork_compose.plugin.Plugin` and
 attach it to the `DORK_PLUGINS` variable:
 
-```
-env:multi:lib:autobuild:hotcode:dependencies:filesystem:proxy:dns:vault:my_plugin=~/path/to/myplugin.py
+```bash
+export DORK_SOURCE="env:multi:lib:autobuild:hotcode:dependencies:filesystem:proxy:dns:vault:my_plugin=~/path/to/myplugin.py"
 ```
 
 For example plugins have a look at the `plugins` directory inside the `dork-compose` source.
