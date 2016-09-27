@@ -110,7 +110,7 @@ For example plugins have a look at the `plugins` directory inside the `dork-comp
 `dork-compose` is able to create snapshots of all data volumes used in a compose
 project. This is done by using the additional `dork-compose snapshot` command.
 For an example of how to work with snapshots, please refer to the
-*drupal-simple* example in the [examples repository](https://github.com/iamdork/examples).
+*drupal-simple* example in the [recipes repository](https://github.com/iamdork/recipes).
 
 ### Projects & Instances
 
