@@ -8,4 +8,4 @@ services:
     ports:
     - ${DORK_DNS_PORT}:53/tcp
     - ${DORK_DNS_PORT}:53/udp
-    command: -A /${DORK_PROXY_DOMAIN}/127.0.0.1
+    command: -A /${DORK_PROXY_DOMAIN}/${DORK_DNS_HOST}
