@@ -20,8 +20,8 @@ class Plugin(dork_compose.plugin.Plugin):
             pass
 
         if isinstance(service.options.get('labels'), dict):
-            # root = service.options.get('labels').get('dork.root', root)
-            # source = service.options.get('labels').get('dork.source', source)
+            root = service.options.get('Labels', {}).get('dork.root', root)
+            source = service.options.get('Labels', {}).get('dork.source', source)
             hotcode = service.options.get('labels').get('dork.hotcode', hotcode)
 
         if not root:

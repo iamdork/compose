@@ -17,26 +17,29 @@ class Plugin(dork_compose.plugin.Plugin):
 
     def after_build(self, service, no_cache, pull, force_rm):
         client = from_env()
-        image = client.inspect_image(service.image_name)
         root = None
-        source = None
-        if image.get('Config', {}).get('Labels'):
-            root = image.get('Config', {}).get('Labels', {}).get('dork.root', None)
-            source = image.get('Config', {}).get('Labels', {}).get('dork.source', None)
-        if not root:
-            return
+        source = '.'
+        hotcode = ''
+        dependencies = ''
+        try:
+            image = service.client.inspect_image(service.image_name)
+            if image.get('Config', {}).get('Labels'):
+                root = image.get('Config', {}).get('Labels', {}).get('dork.root')
+                source = image.get('Config', {}).get('Labels', {}).get('dork.source', '.')
+                hotcode = image.get('Config', {}).get('Labels', {}).get('dork.hotcode', '')
+                dependencies = image.get('Config', {}).get('Labels', {}).get('dork.dependencies', '')
+        except APIError:
+            pass
 
-        deps = filter(lambda x: x, image.get('Config', {}).get('Labels', {}).get('dork.dependencies', '').split(';'))
+        if isinstance(service.options.get('labels'), dict):
+            root = service.options.get('Labels', {}).get('dork.root', root)
+            source = service.options.get('Labels', {}).get('dork.source', source)
+            hotcode = service.options.get('labels').get('dork.hotcode', hotcode)
+            dependencies = service.options.get('labels').get('dork.dependencies', dependencies)
 
-        hotcode = []
-        if service.options and service.options.get('labels'):
-            hotcode = service.options\
-                .get('labels')\
-                .get('dork.hotcode', image.get('Config', {})
-                     .get('Labels', {}).get('dork.hotcode', ''))
-
-            hotcode = filter(lambda x: x, hotcode.split(';'))
-        hotcode.append('.git')
+        deps = filter(lambda x: x, dependencies.split(';')) if dependencies else []
+        hot = filter(lambda x: x, hotcode.split(';')) if hotcode else []
+        hot.append('.git')
 
         if not (source and root and deps):
             return
@@ -66,7 +69,7 @@ class Plugin(dork_compose.plugin.Plugin):
                     ),
                     environment={
                         'SOURCE': src,
-                        'EXCLUDE': ' '.join(hotcode)
+                        'EXCLUDE': ' '.join(hot)
                     }
                 )['Id']
                 try:
