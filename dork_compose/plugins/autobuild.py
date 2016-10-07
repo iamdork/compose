@@ -70,7 +70,13 @@ class Plugin(dork_compose.plugin.Plugin):
                 open('%s/.dockerignore' % source, 'a').close()
 
             with open(dockerfile, 'w') as f:
-                f.write('FROM %s \nLABEL dork.source="%s"' % (onbuild, source))
+                # TODO: don't rely on virtualport
+                # proxy plugin should not modify config so we can use real ports
+                virtual_port = service.options.get('environment', {}).get('VIRTUAL_PORT', None)
+                if virtual_port:
+                    f.write('FROM %s \nLABEL dork.source="%s"\nEXPOSE %s' % (onbuild, source, virtual_port))
+                else:
+                    f.write('FROM %s \nLABEL dork.source="%s"' % (onbuild, source))
 
             try:
                 image = service.client.inspect_image(onbuild)
