@@ -5,6 +5,8 @@ from docker.client import from_env
 from docker.errors import APIError
 
 import logging
+import os
+
 log = logging.getLogger(__name__)
 
 
@@ -14,6 +16,14 @@ class Plugin(dork_compose.plugin.Plugin):
         if command == 'run':
             raise StandardError('Skip dependencies plugin on "run" command.')
         super(Plugin, self).__init__(env, name, command)
+
+    @property
+    def uid(self):
+        return self.env.get('DORK_UID', os.getuid())
+
+    @property
+    def gid(self):
+        return self.env.get('DORK_GID', self.uid)
 
     def after_build(self, service, no_cache, pull, force_rm):
         client = from_env()
@@ -63,6 +73,7 @@ class Plugin(dork_compose.plugin.Plugin):
                 sync = client.create_container(
                     image='iamdork/rsync',
                     volumes=['/destination'],
+                    user="%s:%s" % (self.uid, self.gid),
                     host_config=client.create_host_config(
                         binds=['%s:/destination' % dst],
                         volumes_from=container

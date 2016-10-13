@@ -1,6 +1,7 @@
 version: '2'
 services:
   http:
+    user: 1000:1000
     image: nginx
     ports:
     - 80:80
