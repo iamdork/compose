@@ -84,11 +84,14 @@ class Plugin(dork_compose.plugin.Plugin):
                 service.client.pull(onbuild)
                 image = service.client.inspect_image(onbuild)
 
-
             dependencies = (filter(lambda x: x, image.get('Config', {})
                                    .get('Labels', {})
                                    .get('dork.dependencies', '')
                                    .split(';')))
+
+            if isinstance(service.options.get('labels'), dict):
+                dependencies = service.options\
+                    .get('labels').get('dork.dependencies', '').split(';')
 
             with open(dockerignore, 'a') as f:
                 f.write('\n' + '\n'.join(dependencies))
