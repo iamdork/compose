@@ -89,9 +89,8 @@ class Plugin(dork_compose.plugin.Plugin):
                                    .get('dork.dependencies', '')
                                    .split(';')))
 
-            if isinstance(service.options.get('labels'), dict):
-                dependencies = service.options\
-                    .get('labels').get('dork.dependencies', '').split(';')
+            if isinstance(service.options.get('labels'), dict) and 'dork.dependencies' in service.options['labels']:
+                dependencies = service.options.get('labels').get('dork.dependencies', '').split(';')
 
             with open(dockerignore, 'a') as f:
                 f.write('\n' + '\n'.join(dependencies))
