@@ -56,13 +56,13 @@ class Plugin(dork_compose.plugin.Plugin):
             confline = 'nameserver %s' % self.environment()['DORK_DNS_HOST']
 
             lines = []
+            lines.append(confline + '\n')
             with open(resolver, 'r') as resolvconf:
                 for line in resolvconf.readlines():
                     if confline in line:
                         return
                     lines.append(line)
 
-            lines.append(confline + '\n')
             lines.append('\n')
             tmp = tempfile.NamedTemporaryFile(delete=False)
             tmp.write(''.join(lines))
