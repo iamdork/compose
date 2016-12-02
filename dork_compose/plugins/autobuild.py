@@ -35,7 +35,6 @@ class Plugin(dork_compose.plugin.Plugin):
 
         if not onbuild and context and not context.startswith(self.env['DORK_SOURCE']):
             dockerfile = service.options.get('build', {}).get('dockerfile', None)
-            args = service.options.get('build', {}).get('args', {})
 
             onbuild = "%s/%s:autobuild" % (
                 os.path.basename(self.env.get('DORK_LIBRARY', self.project)),
@@ -49,7 +48,6 @@ class Plugin(dork_compose.plugin.Plugin):
                 forcerm=force_rm,
                 nocache=no_cache,
                 dockerfile=dockerfile,
-                buildargs=args,
             )
             try:
                 stream_output(build_output, sys.stdout)
