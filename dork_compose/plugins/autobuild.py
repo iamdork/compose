@@ -35,7 +35,6 @@ class Plugin(dork_compose.plugin.Plugin):
 
         if not onbuild and context and not context.startswith(self.env['DORK_SOURCE']):
             dockerfile = service.options.get('build', {}).get('dockerfile', None)
-            args = service.options.get('build', {}).get('args', {})
 
             onbuild = "%s/%s:autobuild" % (
                 os.path.basename(self.env.get('DORK_LIBRARY', self.project)),
@@ -49,7 +48,6 @@ class Plugin(dork_compose.plugin.Plugin):
                 forcerm=force_rm,
                 nocache=no_cache,
                 dockerfile=dockerfile,
-                buildargs=args,
             )
             try:
                 stream_output(build_output, sys.stdout)
@@ -84,11 +82,13 @@ class Plugin(dork_compose.plugin.Plugin):
                 service.client.pull(onbuild)
                 image = service.client.inspect_image(onbuild)
 
-
             dependencies = (filter(lambda x: x, image.get('Config', {})
                                    .get('Labels', {})
                                    .get('dork.dependencies', '')
                                    .split(';')))
+
+            if isinstance(service.options.get('labels'), dict) and 'dork.dependencies' in service.options['labels']:
+                dependencies = service.options.get('labels').get('dork.dependencies', '').split(';')
 
             with open(dockerignore, 'a') as f:
                 f.write('\n' + '\n'.join(dependencies))

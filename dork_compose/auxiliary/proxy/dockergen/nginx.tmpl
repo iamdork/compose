@@ -100,6 +100,8 @@ upstream {{ $host }} {
 		{{ end }}
 	{{ end }}
 {{ end }}
+{{/* Fix for empty upstreams */}}
+	server localhost down;
 }
 
 {{ $default_host := or ($.Env.DEFAULT_HOST) "" }}

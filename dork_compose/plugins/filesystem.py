@@ -55,6 +55,7 @@ class Plugin(dork_compose.plugin.Plugin):
                 sync = client.create_container(
                     image='iamdork/rsync',
                     volumes=['/destination', '/source'],
+                    cpu_shares=256,
                     host_config=client.create_host_config(binds=[
                         '%s/%s:/destination' % (snapshot, v),
                         '%s:/source' % volumes[v].full_name
