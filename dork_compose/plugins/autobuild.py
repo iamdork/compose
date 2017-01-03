@@ -1,6 +1,7 @@
 import dork_compose.plugin
 import os
 import shutil
+from dork_compose.helpers import is_subdir
 
 import six
 import sys
@@ -29,11 +30,13 @@ class Plugin(dork_compose.plugin.Plugin):
         }
 
     def building(self, service, no_cache, pull, force_rm):
+        
+
         context = service.options.get('build', {}).get('context', None)
         source = service.options.get('build', {}).get('source', '.')
         onbuild = service.options.get('build', {}).get('onbuild', None)
 
-        if not onbuild and context and not context.startswith(self.env['DORK_SOURCE']):
+        if not onbuild and context and not is_subdir(context, self.env['DORK_SOURCE']):
             dockerfile = service.options.get('build', {}).get('dockerfile', None)
 
             onbuild = "%s/%s:autobuild" % (
