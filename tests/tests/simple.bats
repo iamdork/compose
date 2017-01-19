@@ -27,4 +27,7 @@ load common
 
   # Test if the http service has been removed.
   ! docker ps -a | grep 'simple_http_1'
+
+  # Test if the proxy has been removed too.
+  ! docker ps -a | grep 'proxy'
 }

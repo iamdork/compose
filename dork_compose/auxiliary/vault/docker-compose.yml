@@ -2,6 +2,8 @@ version: '2'
 services:
   vault:
     image: vault
+    labels:
+    - org.iamdork.auxiliary
     ports:
     - 8200:8200
     environment:

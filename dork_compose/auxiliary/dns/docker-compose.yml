@@ -3,6 +3,8 @@ version: '2'
 services:
   dns:
     image: andyshinn/dnsmasq:2.75
+    labels:
+    - org.iamdork.auxiliary
     cap_add:
     - NET_ADMIN
     ports:

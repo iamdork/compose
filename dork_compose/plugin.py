@@ -246,7 +246,6 @@ class Plugin(object):
 
         lock = filelock.SoftFileLock(self.auxiliary_project_name)
         with lock.acquire(60):
-            aux.up(detached=True, remove_orphans=True)
 
             client = docker_client(self.environment())
 
@@ -259,11 +258,12 @@ class Plugin(object):
 
             for container in containers:
                 if network in container['NetworkSettings']['Networks']:
-                    client.disconnect_container_from_network(container, network)
-                    if (len(container['NetworkSettings']['Networks']) - 1) == len(aux.networks.networks):
-                        # aux.down(remove_image_type=None, include_volumes=False, remove_orphans=True)
-                        # TODO: investigate why auxiliary service shutdowns dont always work
+                    try:
+                        client.disconnect_container_from_network(container, network)
+                    except:
                         pass
+                    if (len(container['NetworkSettings']['Networks']) - 1) == len(aux.networks.networks):
+                        aux.down(remove_image_type=None, include_volumes=False, remove_orphans=True)
 
     def get_auxiliary_project(self):
         config_details = config.find(self.auxiliary_project, [], Environment(self.environment()))
