@@ -70,7 +70,7 @@ setup(
     # requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
     install_requires=[
-        'docker-compose==1.8.1',
+        'docker-compose==1.10',
         'gitpython',
         'terminaltables',
         'filelock',
