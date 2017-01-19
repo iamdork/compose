@@ -1,11 +1,11 @@
 import dork_compose.plugin
-from docker.client import from_env
+from docker.api.client import APIClient
 
 
 class Plugin(dork_compose.plugin.Plugin):
 
     def cleanup(self):
-        client = from_env()
+        client = APIClient()
         # Remove unused volumes.
         volumes = client.volumes({'dangling': True})
         if volumes and volumes['Volumes']:

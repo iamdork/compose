@@ -2,8 +2,9 @@ import dork_compose.plugin
 import os
 
 import time
-from docker.client import from_env
+from docker.api.client import APIClient
 from docker.errors import APIError
+
 
 import logging
 log = logging.getLogger(__name__)
@@ -40,7 +41,7 @@ class Plugin(dork_compose.plugin.Plugin):
             os.makedirs(dir)
 
     def snapshot_save(self, snapshots=(), volumes=()):
-        client = from_env()
+        client = APIClient()
         for name in snapshots:
 
             snapshot = '%s/%s' % (self.snapshot, name)
@@ -71,7 +72,7 @@ class Plugin(dork_compose.plugin.Plugin):
 
     def snapshot_load(self, snapshots=(), volumes=()):
         options = list(set(self.snapshot_ls()) & set(snapshots))
-        client = from_env()
+        client = APIClient()
         try:
             client.inspect_image('iamdork/rsync')
         except APIError:
@@ -105,7 +106,7 @@ class Plugin(dork_compose.plugin.Plugin):
         return None
 
     def snapshot_rm(self, snapshots=()):
-        client = from_env()
+        client = APIClient()
         try:
             client.inspect_image('alpine:3.4')
         except APIError:

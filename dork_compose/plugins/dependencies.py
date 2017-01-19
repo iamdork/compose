@@ -1,6 +1,6 @@
 import dork_compose.plugin
 import time
-from docker.client import from_env
+from docker.api.client import APIClient
 
 from docker.errors import APIError
 
@@ -16,7 +16,7 @@ class Plugin(dork_compose.plugin.Plugin):
         super(Plugin, self).__init__(env, name, command)
 
     def after_build(self, service, no_cache, pull, force_rm):
-        client = from_env()
+        client = APIClient()
         root = None
         source = '.'
         hotcode = ''

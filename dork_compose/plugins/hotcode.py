@@ -1,6 +1,5 @@
 import dork_compose.plugin
 from compose.config.config import VolumeSpec
-from docker.client import from_env
 from docker.errors import APIError, NotFound
 
 
