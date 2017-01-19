@@ -45,6 +45,7 @@ class Plugin(dork_compose.plugin.Plugin):
                 tmp = tempfile.NamedTemporaryFile(delete=False)
                 tmp.write(content)
                 tmp.close()
+                call(['sudo', 'mkdir', '-p', '/etc/resolver'])
                 call(['sudo', 'cp', tmp.name, resolver])
                 call(['sudo', 'chmod', '664', resolver])
                 os.remove(tmp.name)
