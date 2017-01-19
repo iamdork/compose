@@ -4,6 +4,7 @@ import contextlib
 from compose.cli.command import get_client
 from compose.cli.docker_client import docker_client
 from compose.config import config
+from compose.config.environment import Environment
 from dork_compose.injections import dork_config_load
 from compose.const import API_VERSIONS
 from compose.project import Project
@@ -265,7 +266,7 @@ class Plugin(object):
                         pass
 
     def get_auxiliary_project(self):
-        config_details = config.find(self.auxiliary_project, [], self.environment())
+        config_details = config.find(self.auxiliary_project, [], Environment(self.environment()))
         project_name = self.auxiliary_project_name
         config_data = dork_config_load([], config_details)
 
