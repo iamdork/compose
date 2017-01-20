@@ -3,7 +3,6 @@
 load common
 
 @test "Build secret test" {
-  skip
   cd sources/secret
 
   dork-compose up -d --build
