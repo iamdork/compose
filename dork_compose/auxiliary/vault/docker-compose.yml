@@ -4,6 +4,8 @@ services:
     image: vault
     labels:
     - org.iamdork.auxiliary
+    privileged: true
+    userns_mode: host
     cap_add:
     - IPC_LOCK
     ports:
