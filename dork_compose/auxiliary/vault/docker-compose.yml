@@ -4,6 +4,8 @@ services:
     image: vault
     labels:
     - org.iamdork.auxiliary
+    cap_add:
+    - IPC_LOCK
     ports:
     - 8200:8200
     environment:
