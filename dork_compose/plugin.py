@@ -269,9 +269,11 @@ class Plugin(object):
 
             for container in containers:
                 if network in container['NetworkSettings']['Networks']:
-                    client.disconnect_container_from_network(container, network)
                     if (len(container['NetworkSettings']['Networks']) - 1) == len(aux.networks.networks):
                         aux.down(remove_image_type=None, include_volumes=False, remove_orphans=True)
+                        break
+                    else:
+                        client.disconnect_container_from_network(container, network)
 
     def get_auxiliary_project(self):
         config_details = config.find(self.auxiliary_project, [], Environment(self.environment()))
