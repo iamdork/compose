@@ -97,6 +97,10 @@ class Plugin(object):
         return os.path.expanduser(self.env['DORK_DATA_DIR'])
 
     @property
+    def lockdir(self):
+        return '%s/locks' % self.datadir
+
+    @property
     def project(self):
         return self.env['DORK_PROJECT']
 
@@ -221,7 +225,11 @@ class Plugin(object):
             return
 
         aux = self.get_auxiliary_project()
-        lock = filelock.SoftFileLock(self.auxiliary_project_name)
+
+        if not os.path.exists(self.lockdir):
+            os.makedirs(self.lockdir)
+        lock = filelock.FileLock("%s/%s" % (self.lockdir, self.auxiliary_project_name))
+
         with lock.acquire(60):
             aux.up(detached=True, remove_orphans=True)
 
@@ -244,7 +252,10 @@ class Plugin(object):
 
         aux = self.get_auxiliary_project()
 
-        lock = filelock.SoftFileLock(self.auxiliary_project_name)
+        if not os.path.exists(self.lockdir):
+            os.makedirs(self.lockdir)
+        lock = filelock.FileLock("%s/%s" % (self.lockdir, self.auxiliary_project_name))
+
         with lock.acquire(60):
 
             client = docker_client(self.environment())
@@ -261,9 +272,10 @@ class Plugin(object):
                     try:
                         client.disconnect_container_from_network(container, network)
                     except:
-                        pass
+                        log.warn('Could not disconnect %s from %s' % (container['Id'], network))
                     if (len(container['NetworkSettings']['Networks']) - 1) == len(aux.networks.networks):
                         aux.down(remove_image_type=None, include_volumes=False, remove_orphans=True)
+
 
     def get_auxiliary_project(self):
         config_details = config.find(self.auxiliary_project, [], Environment(self.environment()))
