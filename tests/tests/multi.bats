@@ -21,9 +21,9 @@ load common
   get two.dork | grep '<h1>Testpage 2.</h1>'
   get three.dork | grep '<h1>Testpage 3.</h1>'
 
-  cd $SOURCES/multi/one && dork-compose down
-  cd $SOURCES/multi/two && dork-compose down
-  cd $SOURCES/multi/three && dork-compose down
+  cd $SOURCES/multi/one && dork-compose down -v --rmi local
+  cd $SOURCES/multi/two && dork-compose down -v --rmi local
+  cd $SOURCES/multi/three && dork-compose down -v --rmi local
 
   # Test if the http service has been removed.
   ! docker ps -a | grep 'one_http_1'
@@ -51,9 +51,9 @@ load common
   get two.dork | grep '<h1>Testpage 2.</h1>'
   get three.dork | grep '<h1>Testpage 3.</h1>'
 
-  (cd $SOURCES/multi/one && dork-compose down) &
-  (cd $SOURCES/multi/two && dork-compose down) &
-  (cd $SOURCES/multi/three && dork-compose down) &
+  (cd $SOURCES/multi/one && dork-compose down -v --rmi local) &
+  (cd $SOURCES/multi/two && dork-compose down -v --rmi local) &
+  (cd $SOURCES/multi/three && dork-compose down -v --rmi local) &
   wait
 
   # Test if the http service has been removed.

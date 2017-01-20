@@ -14,7 +14,7 @@ load common
   # Test if the container is accessible.
   get a.dork | grep '<h1>This is a test.</h1>'
 
-  dork-compose down
+  dork-compose down -v --rmi local
 }
 
 
@@ -30,5 +30,5 @@ load common
   # Test if the container is accessible.
   get a.dork | grep '<h1>This is a test.</h1>'
 
-  dork-compose down
+  dork-compose down -v --rmi local
 }

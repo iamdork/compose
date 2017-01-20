@@ -18,7 +18,7 @@ load common
   get a--hotcode.dork | grep 'This is a hotcode test.'
   rm html/index.html && echo "This is a test." >> html/index.html
 
-  dork-compose down
+  dork-compose down -v --rmi local
 
   # Test if the http service has been removed.
   ! docker ps -a | grep 'hotcode_a_1'
@@ -40,7 +40,7 @@ load common
   get b--hotcode.dork | grep 'This is a test.'
   rm html/index.html && echo "This is a test." >> html/index.html
 
-  dork-compose down
+  dork-compose down -v --rmi local
 
   # Test if the http service has been removed.
   ! docker ps -a | grep 'hotcode_b_1'

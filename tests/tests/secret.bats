@@ -16,7 +16,7 @@ load common
   # Test if the container is accessible.
   get secret.dork | grep 'The lost art of keeping a secret'
 
-  dork-compose down
+  dork-compose down -v --rmi local
 
   # Test if the http service has been removed.
   ! docker ps -a | grep 'secret_http_1'

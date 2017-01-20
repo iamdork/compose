@@ -12,6 +12,7 @@ load common
   dork-compose snapshot rm test
 
   ! ls -la ~/.dork/snapshots/filesystem | grep test
+  dork-compose down -v --rmi local
 }
 
 @test "Load a snapshot" {
@@ -32,4 +33,5 @@ load common
   get filesystem.dork | grep "Test"
 
   dork-compose snapshot rm test
+  dork-compose down -v --rmi local
 }

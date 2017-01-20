@@ -29,7 +29,7 @@ load common
   curl -u dork:dork --resolve auth.dork:80:127.0.0.1 http://auth.dork | grep '<h1>Testpage.</h1>'
   curl -u dork:dork --resolve web--auth.dork:80:127.0.0.1 http://web--auth.dork | grep '<h1>Testpage.</h1>'
 
-  dork-compose down
+  dork-compose down -v --rmi local
 
   # Test if the services has been removed.
   ! docker ps -a | grep 'auth_http_1'
@@ -54,7 +54,7 @@ load common
   # The web container should be accessible with a login.
   curl -u dork:dork --resolve web--noauth.dork:80:127.0.0.1 http://web--noauth.dork | grep '<h1>Testpage.</h1>'
 
-  dork-compose down
+  dork-compose down -v --rmi local
 
   # Test if the services has been removed.
   ! docker ps -a | grep 'noauth_http_1'

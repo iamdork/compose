@@ -20,7 +20,7 @@ load common
   get tree--two.dork index.html | grep '<h1>Testpage 2</h1>'
 
   cd $SOURCES/tree/one
-  dork-compose down
+  dork-compose down -v --rmi local
   cd $SOURCES/tree/two
-  dork-compose down
+  dork-compose down -v --rmi local
 }

@@ -13,7 +13,7 @@ load common
   get a--autobuild.dork | grep '<h1>I am autobuild!</h1>'
   get b--autobuild.dork | grep '<h2>Autobuild subfolder.</h2>'
 
-  dork-compose down
+  dork-compose down -v --rmi local
 }
 
 @test "Test autobuild .dockerignore" {
@@ -25,7 +25,7 @@ load common
   sleep 1
   curl --resolve a--autobuild.dork:80:127.0.0.1 http://a--autobuild.dork/sub | grep '404'
 
-  dork-compose down
+  dork-compose down -v --rmi local
 }
 
 @test "Test autobuild automatic .dockerignore" {
@@ -39,5 +39,5 @@ load common
   curl --resolve a--autobuild.dork:80:127.0.0.1 http://a--autobuild.dork/vendor | grep '404'
   curl --resolve b--autobuild.dork:80:127.0.0.1 http://b--autobuild.dork/vendor | grep '404'
 
-  dork-compose down
+  dork-compose down -v --rmi local
 }

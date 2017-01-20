@@ -23,7 +23,7 @@ load common
   # Test if the container is accessible.
   get simple.dork | grep '<h1>Testpage.</h1>'
 
-  dork-compose down
+  dork-compose down -v --rmi local
 
   # Test if the http service has been removed.
   ! docker ps -a | grep 'simple_http_1'
