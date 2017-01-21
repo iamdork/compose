@@ -18,6 +18,10 @@ load common
   docker ps | grep 'auth_http_1'
   docker ps | grep 'auth_web_1'
 
+  # Test if auth files are installed.
+  ls -la ~/.dork/auth | grep auth.dork
+  ls -la ~/.dork/auth | grep web--auth.dork
+
   # Sleep to wait for the container to boot.
   sleep 1
 
@@ -34,6 +38,10 @@ load common
   # Test if the services has been removed.
   ! docker ps -a | grep 'auth_http_1'
   ! docker ps -a | grep 'auth_web_1'
+
+  # Test if auth files have been removed.
+  ! ls -la ~/.dork/auth | grep auth.dork
+  ! ls -la ~/.dork/auth | grep web--auth.dork
 }
 
 @test "Test authorization override for a service" {

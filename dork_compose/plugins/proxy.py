@@ -196,3 +196,12 @@ class Plugin(dork_compose.plugin.Plugin):
                         f.writelines(lines)
                 elif os.path.exists(authfile):
                     os.remove(authfile)
+
+    def removed(self, project, include_volumes=False):
+        for service in project.get_services():
+            if self.auth_dir and 'environment' in service.options and 'VIRTUAL_HOST' in service.options['environment']:
+                authfile = '%s/%s' % (self.auth_dir, service.options['environment']['VIRTUAL_HOST'])
+                if os.path.isfile(authfile):
+                    os.remove(authfile)
+
+
