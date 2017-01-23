@@ -90,7 +90,7 @@ setup(
     # pip to create the appropriate form of executable for the target platform.
     entry_points={
         'console_scripts': [
-            'dork-compose=dork_compose:run',
+            'dork-compose=dork_compose.main:run',
         ],
     },
 )
