@@ -4,6 +4,7 @@ import os
 from compose.cli.command import get_project
 import compose.cli.command as cmd
 from compose.cli.main import TopLevelCommand, perform_command
+from compose.cli.utils import get_version_info
 from compose.config.config import load
 from compose.config.environment import Environment
 from compose.const import DEFAULT_TIMEOUT
@@ -19,10 +20,28 @@ from functools import partial
 from jsonschema import Draft4Validator
 from jsonschema import FormatChecker
 from jsonschema import RefResolver
+import dork_compose
 
 
 import logging
 log = logging.getLogger(__name__)
+
+
+def dork_get_version_info(scope):
+    return '%s%sdork-compose version %s, build %s ' % (
+        get_version_info(scope),
+        ', ' if scope == 'compose' else '\n',
+        dork_compose.__version__,
+        dork_get_build_version()
+    )
+
+
+def dork_get_build_version():
+    filename = os.path.join(os.path.dirname(dork_compose.__file__), 'GITSHA')
+    if not os.path.exists(filename):
+        return 'unknown'
+    with open(filename) as fh:
+        return fh.read().strip()
 
 
 def dork_perform_command(options, handler, command_options):

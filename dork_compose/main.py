@@ -9,9 +9,10 @@ import compose.config.validation
 import compose.project
 import compose.cli.command
 import compose.cli.main
+import compose.cli.utils
 from compose.cli.docopt_command import NoSuchCommand
 
-from injections import DorkTopLevelCommand, get_dork_project, get_dork_project_name, dork_config_load, dork_validate_against_config_schema, dork_validate_service_constraints, dork_perform_command
+from injections import DorkTopLevelCommand, get_dork_project, get_dork_project_name, dork_config_load, dork_validate_against_config_schema, dork_validate_service_constraints, dork_perform_command, dork_get_version_info
 from compose.config.environment import env_vars_from_file
 
 # Default plugins:
@@ -29,6 +30,7 @@ def run():
     # Replace compose TopLevelCommand with custom derivation with additional
     # commands.
     compose.cli.main.TopLevelCommand = DorkTopLevelCommand
+    compose.cli.main.get_version_info = dork_get_version_info
 
     try:
         command = compose.cli.main.dispatch().args[1].__name__
