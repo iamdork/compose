@@ -8,7 +8,7 @@ from compose.config.config import load
 from compose.config.environment import Environment
 from compose.const import DEFAULT_TIMEOUT
 from compose.project import Project, ProjectNetworks
-from compose.service import ConvergenceStrategy, BuildAction, Service
+from compose.service import ConvergenceStrategy, BuildAction, ImageType, Service
 from compose.config.validation import load_jsonschema, get_resolver_path, \
     handle_errors, process_config_schema_errors, \
     process_service_constraint_errors
@@ -227,7 +227,10 @@ class DorkProject(Project, Pluggable):
         for plugin in self.plugins:
             plugin.initializing(self, service_names)
 
-        containers = super(DorkProject, self).up(service_names, start_deps, strategy, do_build, timeout, detached, remove_orphans)
+        if 'autobuild' in [plugin.name for plugin in self.plugins]:
+            containers = super(DorkProject, self).up(service_names, start_deps, strategy, BuildAction.force, timeout, detached, remove_orphans)
+        else:
+            containers = super(DorkProject, self).up(service_names, start_deps, strategy, do_build, timeout, detached, remove_orphans)
 
         for plugin in self.plugins:
             plugin.initialized(self, containers)
@@ -238,7 +241,10 @@ class DorkProject(Project, Pluggable):
         for plugin in self.plugins:
             plugin.removing(self, include_volumes)
 
-        super(DorkProject, self).down(remove_image_type, include_volumes, remove_orphans)
+        if 'autobuild' in [plugin.name for plugin in self.plugins]:
+            super(DorkProject, self).down(remove_image_type, include_volumes, remove_orphans)
+        else:
+            super(DorkProject, self).down(ImageType.local, include_volumes, remove_orphans)
 
         for plugin in self.plugins:
             plugin.removed(self, include_volumes)

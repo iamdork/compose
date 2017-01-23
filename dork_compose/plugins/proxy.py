@@ -57,6 +57,7 @@ class Plugin(dork_compose.plugin.Plugin):
     @property
     def https_method(self):
         return os.path.expanduser(self.env.get('DORK_PROXY_HTTPS_METHOD', 'noredirect'))
+
     @property
     def auth_dir(self):
         return os.path.expanduser(self.env.get('DORK_PROXY_AUTH_DIR', '%s/auth' % self.datadir))
