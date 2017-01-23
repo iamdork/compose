@@ -14,7 +14,6 @@ class Plugin(dork_compose.plugin.Plugin):
 
     def __init__(self, env, name, command):
         dork_compose.plugin.Plugin.__init__(self, env, name, command)
-        self.auth = self.collect_auth_files()
 
     def environment(self):
         return {
@@ -45,12 +44,13 @@ class Plugin(dork_compose.plugin.Plugin):
 
     def info(self, project):
         info = {}
-        auth = self.collect_auth_files()
+
+        auth = self.collect_auth_files([service.name for service in project.services])
         for service in project.services:
             if 'environment' in service.options and 'VIRTUAL_HOST' in service.options['environment']:
                 key = '%s url' % service.name
                 info[key] = service.options['environment'].get('VIRTUAL_PROTO', 'http') + '://' + service.options['environment']['VIRTUAL_HOST']
-                if ('.auth' in auth or '.auth.%s' % service.name in auth) and service.name not in auth['.no_auth']:
+                if service.name in auth and auth[service.name]:
                     info[key] += ' (password protected)'
         return info
 
@@ -114,43 +114,34 @@ class Plugin(dork_compose.plugin.Plugin):
                             service['environment']['VIRTUAL_PORT'] = int(internal)
                             del service['ports'][index]
 
-    def collect_auth_files(self):
-        files = {
-            '.no_auth': []
-        }
+    def collect_auth_files(self, services):
+        files = {service: [] for service in services}
 
         path = filter(len, self.basedir.split('/'))
         current = ''
         while len(path):
             current = current + '/' + path.pop(0)
+
             auth = '%s/.auth' % current
             if os.path.isfile(auth):
-                if '.auth' not in files:
-                    files['.auth'] = []
                 with open(auth) as f:
-                    files['.auth'].append(f.read())
-            for file in glob.glob('%s/.auth.*' % current):
-                filename = os.path.basename(file)
-                if filename not in files:
-                    files[filename] = []
-                with open(file) as f:
-                    files[filename].append(f.read())
+                    for service in services:
+                        files[service].append(f.read())
 
-            for file in glob.glob('%s/.no_auth*' % current):
-                filename = os.path.basename(file)
-                no_auth = filename.split('.no_auth.')
-                if len(no_auth) > 1:
-                    service = no_auth[1]
+            no_auth = '%s/.no_auth' % current
+            if os.path.isfile(no_auth):
+                for service in services:
+                    if service in files:
+                        files[service] = []
 
-                    auth_service = '.auth.%s' % service
-                    if auth_service in files:
-                       del files[auth_service]
-
-                    if '.no_auth' not in files:
-                        files['.no_auth'] = []
-                    files['.no_auth'].append(service)
-                else:
-                    del files['.auth']
+            for service in services:
+                auth = '%s/.auth.%s' % (current, service)
+                no_auth = '%s/.no_auth.%s' % (current, service)
+                if os.path.isfile(auth):
+                    with open(auth) as f:
+                        files[service].append(f.read())
+                if os.path.isfile(no_auth):
+                    files[service] = []
 
         return files
 
@@ -177,18 +168,12 @@ class Plugin(dork_compose.plugin.Plugin):
                     '-subj', '/C=GB/ST=London/L=London/O=Global Security/OU=IT Department/CN=*.%s' % self.proxy_domain
                 ])
 
+        auth = self.collect_auth_files([service.name for service in project.get_services()])
+
         for service in project.get_services():
-            if self.auth_dir and 'environment' in service.options and 'VIRTUAL_HOST' in service.options['environment'] and service.name not in self.auth['.no_auth']:
-                lines = []
-
-                if '.auth' in self.auth:
-                    lines.extend(self.auth['.auth'])
-
-                if '.auth.%s' % service.name in self.auth:
-                    lines.extend(self.auth['.auth.%s' % service.name])
-
+            if self.auth_dir and 'environment' in service.options and 'VIRTUAL_HOST' in service.options['environment']:
+                lines = auth[service.name]
                 authfile = '%s/%s' % (self.auth_dir, service.options['environment']['VIRTUAL_HOST'])
-
                 if lines:
                     if not os.path.isdir(self.auth_dir):
                         os.makedirs(self.auth_dir)
