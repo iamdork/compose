@@ -113,7 +113,7 @@ class Plugin(dork_compose.plugin.Plugin):
                             if 'labels' not in service:
                                 service['labels'] = {}
                             service['environment']['VIRTUAL_PORT'] = int(internal)
-                            del service['ports'][index]
+                            service['ports'][index] = internal
 
     def collect_auth_files(self, services):
         files = {service: [] for service in services}
