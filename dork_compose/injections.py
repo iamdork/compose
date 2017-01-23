@@ -20,7 +20,7 @@ from functools import partial
 from jsonschema import Draft4Validator
 from jsonschema import FormatChecker
 from jsonschema import RefResolver
-import dork_compose
+import version
 
 
 import logging
@@ -31,7 +31,7 @@ def dork_get_version_info(scope):
     return '%s%sdork-compose version %s, build %s ' % (
         get_version_info(scope),
         ', ' if scope == 'compose' else '\n',
-        dork_compose.__version__,
+        version.__version__,
         dork_get_build_version()
     )
 

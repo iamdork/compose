@@ -6,7 +6,7 @@ https://github.com/pypa/sampleproject
 """
 
 import os
-import dork_compose
+import dork_compose.version
 
 # Always prefer setuptools over distutils
 from setuptools import setup, find_packages
@@ -18,7 +18,7 @@ setup(
     # Versions should comply with PEP440.  For a discussion on single-sourcing
     # the version across setup.py and the project code, see
     # https://packaging.python.org/en/latest/single_source_version.html
-    version=dork_compose.__version__,
+    version=dork_compose.version.__version__,
 
     description='docker-compose with magicks.',
 
