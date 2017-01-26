@@ -44,27 +44,18 @@ class Plugin(dork_compose.plugin.Plugin):
                 service.name
             )
 
-            onbuild_exists = False
-
+            build_output = service.client.build(
+                path=context,
+                tag=onbuild,
+                pull=pull,
+                forcerm=force_rm,
+                nocache=no_cache,
+                dockerfile=dockerfile,
+            )
             try:
-                service.client.inspect_image(onbuild)
-                onbuild_exists = True
-            except NotFound:
-                pass
-
-            if no_cache or not onbuild_exists:
-                build_output = service.client.build(
-                    path=context,
-                    tag=onbuild,
-                    pull=pull,
-                    forcerm=force_rm,
-                    nocache=no_cache,
-                    dockerfile=dockerfile,
-                )
-                try:
-                    stream_output(build_output, sys.stdout)
-                except StreamOutputError as e:
-                    raise BuildError(self, six.text_type(e))
+                stream_output(build_output, sys.stdout)
+            except StreamOutputError as e:
+                raise BuildError(self, six.text_type(e))
 
         if onbuild:
             self.clean_paths.append(source)
