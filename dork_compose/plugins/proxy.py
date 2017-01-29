@@ -2,13 +2,13 @@ import dork_compose.plugin
 from compose.cli.docker_client import docker_client
 from dork_compose.helpers import notdefault, tru
 import os
-import glob
 import urlparse
 import pkg_resources
 from subprocess import check_call
 
 import logging
 log = logging.getLogger(__name__)
+
 
 class Plugin(dork_compose.plugin.Plugin):
 
