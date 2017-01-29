@@ -1,10 +1,13 @@
-import os;
+import os
+
 
 def tru(val):
     return val
 
+
 def notdefault(val):
     return val if val != 'default' else None
+
 
 def is_subdir(path, directory):
     path = os.path.realpath(path)
