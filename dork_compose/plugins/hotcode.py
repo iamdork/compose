@@ -43,24 +43,23 @@ class Plugin(dork_compose.plugin.Plugin):
         """
         Inject volumes for all hot code paths.
         """
+        self.sync_code(service=service)
         externals = [v.external for v in service.options['volumes']]
         for v in self.get_hotcode_volumes(service):
             if v.external not in externals:
                 service.options['volumes'].append(v)
 
-    def after_build(self, service, no_cache, pull, force_rm):
+    def sync_code(self, service):
         client = APIClient()
         root = None
         source = '.'
         hotcode = ''
-        dependencies = ''
         try:
             image = service.client.inspect_image(service.image_name)
             if image.get('Config', {}).get('Labels'):
                 root = image.get('Config', {}).get('Labels', {}).get('dork.root')
                 source = image.get('Config', {}).get('Labels', {}).get('dork.source', '.')
                 hotcode = image.get('Config', {}).get('Labels', {}).get('dork.hotcode', '')
-                dependencies = image.get('Config', {}).get('Labels', {}).get('dork.dependencies', '')
         except APIError:
             pass
 
@@ -68,15 +67,13 @@ class Plugin(dork_compose.plugin.Plugin):
             root = service.options.get('labels', {}).get('dork.root', root)
             source = service.options.get('labels', {}).get('dork.source', source)
             hotcode = service.options.get('labels').get('dork.hotcode', hotcode)
-            dependencies = service.options.get('labels').get('dork.dependencies', dependencies)
 
-        deps = filter(lambda x: x, dependencies.split(';')) if dependencies else []
         hot = filter(lambda x: x, hotcode.split(';')) if hotcode else []
         hot.append('.git')
         hot.append('.env')
         hot.append('.dork.env')
 
-        if not (source and root and deps):
+        if not (source and root):
             return
 
         try:
@@ -86,7 +83,7 @@ class Plugin(dork_compose.plugin.Plugin):
 
         container = client.create_container(
             image=service.image_name,
-            volumes=['/'.join([root, path]) for path in deps],
+            volumes=[root],
         )['Id']
 
         try:
