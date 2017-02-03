@@ -73,6 +73,8 @@ class Plugin(dork_compose.plugin.Plugin):
         deps = filter(lambda x: x, dependencies.split(';')) if dependencies else []
         hot = filter(lambda x: x, hotcode.split(';')) if hotcode else []
         hot.append('.git')
+        hot.append('.env')
+        hot.append('.dork.env')
 
         if not (source and root and deps):
             return
