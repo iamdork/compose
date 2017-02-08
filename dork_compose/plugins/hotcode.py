@@ -70,10 +70,6 @@ class Plugin(dork_compose.plugin.Plugin):
 
         skip = filter(lambda x: x, hotcode.split(';')) if hotcode else []
 
-        # If the whole current directory is hotcode, skip syncing.
-        if '.' in skip:
-            return
-
         skip.append('.git')
         skip.append('.env')
         skip.append('.dork.env')
