@@ -68,10 +68,15 @@ class Plugin(dork_compose.plugin.Plugin):
             source = service.options.get('labels', {}).get('dork.source', source)
             hotcode = service.options.get('labels').get('dork.hotcode', hotcode)
 
-        hot = filter(lambda x: x, hotcode.split(';')) if hotcode else []
-        hot.append('.git')
-        hot.append('.env')
-        hot.append('.dork.env')
+        skip = filter(lambda x: x, hotcode.split(';')) if hotcode else []
+
+        # If the whole current directory is hotcode, skip syncing.
+        if '.' in skip:
+            return
+
+        skip.append('.git')
+        skip.append('.env')
+        skip.append('.dork.env')
 
         if not (source and root):
             return
@@ -101,7 +106,7 @@ class Plugin(dork_compose.plugin.Plugin):
                 ),
                 environment={
                     'SOURCE': src,
-                    'EXCLUDE': ' '.join(hot)
+                    'EXCLUDE': ' '.join(skip)
                 }
             )['Id']
             try:
