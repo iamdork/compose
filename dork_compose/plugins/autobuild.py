@@ -85,16 +85,21 @@ class Plugin(dork_compose.plugin.Plugin):
                 service.client.pull(onbuild)
                 image = service.client.inspect_image(onbuild)
 
-            hotcode = (filter(lambda x: x, image.get('Config', {})
+            ignore = (filter(lambda x: x, image.get('Config', {})
                                    .get('Labels', {})
                                    .get('dork.hotcode', '')
                                    .split(';')))
 
             if isinstance(service.options.get('labels'), dict) and 'dork.hotcode' in service.options['labels']:
-                hotcode = service.options.get('labels').get('dork.hotcode', '').split(';')
+                ignore = service.options.get('labels').get('dork.hotcode', '').split(';').filter(lambda x: x != '')
+
+            ignore.append('.dockerignore')
+            ignore.append('.Dockerfile')
+            ignore.append('.dork.dockerignore')
+            ignore.append('.dork.Dockerfile')
 
             with open(dockerignore, 'a') as f:
-                f.write('\n' + '\n'.join(hotcode))
+                f.write('\n' + '\n'.join(ignore))
 
             service.options['build']['context'] = os.path.abspath(source)
 
