@@ -4,3 +4,10 @@ services:
     build: web
     ports:
     - 81:80
+
+  b:
+    build: web
+    labels:
+      dork.hotcode: ''
+    ports:
+    - 82:80
