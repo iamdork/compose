@@ -27,17 +27,3 @@ load common
 
   dork-compose down -v --rmi local
 }
-
-@test "Test autobuild automatic .dockerignore" {
-  cd sources/autobuild
-  export DORK_PLUGINS=env:multi:lib:autobuild:proxy:dns
-
-  dork-compose up -d --build
-
-  sleep 1
-  # Test if the container is accessible.
-  curl --resolve a--autobuild.dork:80:127.0.0.1 http://a--autobuild.dork/vendor | grep '404'
-  curl --resolve b--autobuild.dork:80:127.0.0.1 http://b--autobuild.dork/vendor | grep '404'
-
-  dork-compose down -v --rmi local
-}
