@@ -7,3 +7,10 @@ services:
       source: .
     ports:
     - 81:80
+
+  b:
+    build:
+      context: html
+      source: sub
+    ports:
+    - 82:80
