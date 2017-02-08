@@ -3,4 +3,3 @@ services:
   web:
     build:
       context: web
-      source: .
