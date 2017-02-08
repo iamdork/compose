@@ -91,7 +91,7 @@ class Plugin(dork_compose.plugin.Plugin):
                                    .split(';')))
 
             if isinstance(service.options.get('labels'), dict) and 'dork.hotcode' in service.options['labels']:
-                ignore = service.options.get('labels').get('dork.hotcode', '').split(';').filter(lambda x: x != '')
+                ignore = [path for path in service.options.get('labels').get('dork.hotcode', '').split(';') if path != '']
 
             ignore.append('.dockerignore')
             ignore.append('.Dockerfile')
