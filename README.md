@@ -24,15 +24,8 @@ the same host.
 ## Installation
 `dork-compose` uses the same installation procedures as [docker-compose].
 Either using pip:
-```
-$ pip install dork-compose
-```
-
-Or by installing it as a container itself.
-
 ```bash
-$ curl -L https://raw.githubusercontent.com/iamdork/compose/master/run.sh > /usr/local/bin/dork-compose
-$ chmod +x /usr/local/bin/dork-compose
+pip install dork-compose
 ```
 
 ## Plugins
@@ -46,7 +39,7 @@ act on certain events throughout the `docker-compose` command processes.
 By default the `DORK_PLUGINS` variable looks like this:
 
 ```bash
-export DORK_PLUGINS="env:multi:lib:autobuild:hotcode:dependencies:filesystem:proxy:dns:vault"
+export DORK_PLUGINS="env:multi:lib:autobuild:hotcode:filesystem:proxy:dns:vault"
 ```
 
 That's the default workstation setup. Plugins are executed from left to right.
@@ -56,22 +49,19 @@ Let's run through this example:
 - **env:** Scans parent directories for `.env` or `.dork.env` files and
   populates the environment with their contents.
   
-- **multi:** Multiple different projects. The project name will be the name of
-  the containing directory. It is used to prefix snapshots and build the domain.
+- **multi:** Run multiple different projects on the same host. The
+  project name will be the name ofthe containing directory. It is used
+  to prefix snapshots and build the domain.
 
 - **lib:** If there is a `DORK_LIBRARY` environment variable that contains a
   valid directory, `dork-compose` will assume the `docker-compose.yml` is there.
-  The current application sources will be added to the `Dockerfile` build context
-  automatically.
-  
-- **autbuild:** Automatically includes the current source directory in the build
-  context.
+  `dork-compose` will take care of handling the container build process
+  accordingly.
 
-- **hotcode:** Mount code directories you work on into your local codebase.
+- **autbuild:** Automatically build docker images of application
+  sources if using [onbuild images](https://docs.docker.com/engine/userguide/eng-image/dockerfile_best-practices/#/onbuild).
 
-- **dependencies:** Syncs sources downloaded during the build process (e.g. the
-  composer `vendor` directory) to your local environment. For debugging and IDE
-  autocompletion.
+- **hotcode:** Mount code directories you work on into your local codebase and provide vendor code to your IDE.
 
 - **filesystem:** Implements snapshots as plain rsync. Not particularly fast or
   disk space economic, but works out of the box everywhere.
@@ -88,7 +78,7 @@ Let's run through this example:
 There are no configuration files. Plugins can be configured using environment
 variables, which you define in your shell environment for by using the **env**
 plugin. For a complete list of plugins and their options please refer to
-[Appendix: Plugins][]. For an in-action example of these plugins, please refer
+[Appendix: Plugins](#appendix-plugins). For an in-action example of these plugins, please refer
 to the [drupal-simple](https://github.com/iamdork/recipes/tree/master/drupal-simple)
 in the [recipes repository](https://github.com/iamdork/recipes).
 
@@ -135,5 +125,6 @@ between feature branches.
 ## Appendix: Plugins
 
 *TODO: explain all builtin plugins.*
+
 [docker-compose]: https://docs.docker.com/compose/
 [env]: https://docs.docker.com/compose/compose-file/#env-file
