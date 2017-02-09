@@ -8,7 +8,6 @@ import sys
 from compose.progress_stream import stream_output, StreamOutputError
 from compose.service import BuildError, NoSuchImageError
 from docker.errors import NotFound
-import filelock
 
 
 class Plugin(dork_compose.plugin.Plugin):
@@ -63,50 +62,47 @@ class Plugin(dork_compose.plugin.Plugin):
             dockerfile = '%s/Dockerfile' % source
             dockerignore = '%s/.dockerignore' % source
 
-            lock = filelock.FileLock("%s/.autobuild.lock" % source)
-            with lock.acquire(600):
-                if os.path.isfile(dockerfile):
-                    os.rename(dockerfile, '%s/.dork.Dockerfile' % source)
+            if os.path.isfile(dockerfile):
+                os.rename(dockerfile, '%s/.dork.Dockerfile' % source)
 
-                if os.path.isfile(dockerignore):
-                    shutil.copyfile(dockerignore, '%s/.dork.dockerignore' % source)
+            if os.path.isfile(dockerignore):
+                shutil.copyfile(dockerignore, '%s/.dork.dockerignore' % source)
+            else:
+                open('%s/.dockerignore' % source, 'a').close()
+
+            with open(dockerfile, 'w') as f:
+                # TODO: don't rely on virtualport
+                # proxy plugin should not modify config so we can use real ports
+                virtual_port = service.options.get('environment', {}).get('VIRTUAL_PORT', None)
+                if virtual_port:
+                    f.write('FROM %s \nLABEL dork.source="%s"\nEXPOSE %s' % (onbuild, source, virtual_port))
                 else:
-                    open('%s/.dockerignore' % source, 'a').close()
+                    f.write('FROM %s \nLABEL dork.source="%s"' % (onbuild, source))
 
-                with open(dockerfile, 'w') as f:
-                    # TODO: don't rely on virtualport
-                    # proxy plugin should not modify config so we can use real ports
-                    virtual_port = service.options.get('environment', {}).get('VIRTUAL_PORT', None)
-                    if virtual_port:
-                        f.write('FROM %s \nLABEL dork.source="%s"\nEXPOSE %s' % (onbuild, source, virtual_port))
-                    else:
-                        f.write('FROM %s \nLABEL dork.source="%s"' % (onbuild, source))
+            try:
+                image = service.client.inspect_image(onbuild)
+            except NotFound:
+                service.client.pull(onbuild)
+                image = service.client.inspect_image(onbuild)
 
-                try:
-                    image = service.client.inspect_image(onbuild)
-                except NotFound:
-                    service.client.pull(onbuild)
-                    image = service.client.inspect_image(onbuild)
+            ignore = (filter(lambda x: x, image.get('Config', {})
+                                   .get('Labels', {})
+                                   .get('dork.hotcode', '')
+                                   .split(';')))
 
-                ignore = (filter(lambda x: x, image.get('Config', {})
-                                       .get('Labels', {})
-                                       .get('dork.hotcode', '')
-                                       .split(';')))
+            if isinstance(service.options.get('labels'), dict) and 'dork.hotcode' in service.options['labels']:
+                ignore = [path for path in service.options.get('labels').get('dork.hotcode', '').split(';') if path != '']
 
-                if isinstance(service.options.get('labels'), dict) and 'dork.hotcode' in service.options['labels']:
-                    ignore = [path for path in service.options.get('labels').get('dork.hotcode', '').split(';') if path != '']
+            ignore.append('.dockerignore')
+            ignore.append('Dockerfile')
+            ignore.append('.dork.dockerignore')
+            ignore.append('.dork.Dockerfile')
+            ignore.append('.git')
 
-                ignore.append('.dockerignore')
-                ignore.append('Dockerfile')
-                ignore.append('.dork.dockerignore')
-                ignore.append('.dork.Dockerfile')
-                ignore.append('.git')
-                ignore.append('.gitignore')
+            with open(dockerignore, 'a') as f:
+                f.write('\n' + '\n'.join(ignore))
 
-                with open(dockerignore, 'a') as f:
-                    f.write('\n' + '\n'.join(ignore))
-
-                service.options['build']['context'] = os.path.abspath(source)
+            service.options['build']['context'] = os.path.abspath(source)
 
     def cleanup(self):
         for path in self.clean_paths:

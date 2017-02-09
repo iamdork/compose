@@ -75,8 +75,6 @@ class Plugin(dork_compose.plugin.Plugin):
             return
 
         skip.append('.git')
-        skip.append('.gitgnore')
-        skip.append('.gitconfig')
         skip.append('.env')
         skip.append('.dork.env')
 
