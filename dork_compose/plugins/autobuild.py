@@ -85,16 +85,22 @@ class Plugin(dork_compose.plugin.Plugin):
                 service.client.pull(onbuild)
                 image = service.client.inspect_image(onbuild)
 
-            dependencies = (filter(lambda x: x, image.get('Config', {})
+            ignore = (filter(lambda x: x, image.get('Config', {})
                                    .get('Labels', {})
-                                   .get('dork.dependencies', '')
+                                   .get('dork.hotcode', '')
                                    .split(';')))
 
-            if isinstance(service.options.get('labels'), dict) and 'dork.dependencies' in service.options['labels']:
-                dependencies = service.options.get('labels').get('dork.dependencies', '').split(';')
+            if isinstance(service.options.get('labels'), dict) and 'dork.hotcode' in service.options['labels']:
+                ignore = [path for path in service.options.get('labels').get('dork.hotcode', '').split(';') if path != '']
+
+            ignore.append('.dockerignore')
+            ignore.append('Dockerfile')
+            ignore.append('.dork.dockerignore')
+            ignore.append('.dork.Dockerfile')
+            ignore.append('.git')
 
             with open(dockerignore, 'a') as f:
-                f.write('\n' + '\n'.join(dependencies))
+                f.write('\n' + '\n'.join(ignore))
 
             service.options['build']['context'] = os.path.abspath(source)
 

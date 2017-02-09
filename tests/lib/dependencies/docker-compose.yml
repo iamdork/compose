@@ -1,8 +1,5 @@
 version: '2'
 services:
   web:
-    labels:
-      dork.dependencies: "html;test"
     build:
       context: web
-      source: .
