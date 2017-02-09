@@ -29,6 +29,7 @@ class Plugin(dork_compose.plugin.Plugin):
             hotcode = service.options.get('labels').get('dork.hotcode', hotcode)
 
         if not root:
+            log.warn('Service %s has no dork.root information, can\'t apply hot code directories.' % service.name)
             return []
 
         paths = filter(lambda x: x, hotcode.split(';'))
