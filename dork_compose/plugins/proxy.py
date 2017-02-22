@@ -126,8 +126,9 @@ class Plugin(dork_compose.plugin.Plugin):
             auth = '%s/.auth' % current
             if os.path.isfile(auth):
                 with open(auth) as f:
+                    auth_data = f.read()
                     for service in services:
-                        files[service].append(f.read())
+                        files[service].append(auth_data)
 
             no_auth = '%s/.no_auth' % current
             if os.path.isfile(no_auth):
