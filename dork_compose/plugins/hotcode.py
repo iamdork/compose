@@ -28,7 +28,7 @@ class Plugin(dork_compose.plugin.Plugin):
             source = service.options.get('labels', {}).get('dork.source', source)
             hotcode = service.options.get('labels').get('dork.hotcode', hotcode)
 
-        if not root:
+        if hotcode and not root:
             log.warn('Service %s has no dork.root information, can\'t apply hot code directories.' % service.name)
             return []
 
