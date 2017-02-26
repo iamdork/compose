@@ -93,11 +93,13 @@ class Plugin(dork_compose.plugin.Plugin):
             if isinstance(service.options.get('labels'), dict) and 'dork.hotcode' in service.options['labels']:
                 ignore = [path for path in service.options.get('labels').get('dork.hotcode', '').split(';') if path != '']
 
+            ignore.append('.git')
+            ignore.append('.env')
+            ignore.append('.dork.env')
             ignore.append('.dockerignore')
             ignore.append('Dockerfile')
             ignore.append('.dork.dockerignore')
             ignore.append('.dork.Dockerfile')
-            ignore.append('.git')
 
             with open(dockerignore, 'a') as f:
                 f.write('\n' + '\n'.join(ignore))

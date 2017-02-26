@@ -78,6 +78,10 @@ class Plugin(dork_compose.plugin.Plugin):
         skip.append('.git')
         skip.append('.env')
         skip.append('.dork.env')
+        skip.append('.dockerignore')
+        skip.append('Dockerfile')
+        skip.append('.dork.dockerignore')
+        skip.append('.dork.Dockerfile')
 
         if not (source and root):
             return
@@ -94,7 +98,7 @@ class Plugin(dork_compose.plugin.Plugin):
 
         try:
             dork_source = self.env.get('DORK_SOURCE')
-            src = root
+            src = '/'.join([root, source])
             dst = '/'.join([dork_source, source])
             log.info("Synching %s to %s." % (src, dst))
             sync = client.create_container(
