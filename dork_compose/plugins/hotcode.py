@@ -1,4 +1,5 @@
 import dork_compose.plugin
+import os
 from compose.config.config import VolumeSpec
 from docker.api.client import APIClient
 import logging
@@ -76,12 +77,33 @@ class Plugin(dork_compose.plugin.Plugin):
             return
 
         skip.append('.git')
+        skip.append('.auth')
+        skip.append('.no_auth')
+        skip.append('.no_auth.*')
         skip.append('.env')
         skip.append('.dork.env')
         skip.append('.dockerignore')
         skip.append('Dockerfile')
         skip.append('.dork.dockerignore')
         skip.append('.dork.Dockerfile')
+
+        lib = '/'.join(filter(lambda x: len(x), [
+            os.path.expanduser(self.env.get('DORK_LIBRARY_PATH', '')),
+            os.path.expanduser(self.env.get('DORK_LIBRARY', '')),
+        ]))
+
+        # Ignore all files, that docker and dork ignore.
+        ignore_files = [
+            '%s/.dockerignore' % lib,
+            '.dockerignore',
+            '%s/.dork.dockerignore' % lib,
+            '.dork.dockerignore',
+        ]
+
+        for ignore_file in ignore_files:
+            if os.path.isfile(ignore_file):
+                with open(ignore_file) as f:
+                    skip += f.read().splitlines()
 
         if not (source and root):
             return
