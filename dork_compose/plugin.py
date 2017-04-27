@@ -237,7 +237,7 @@ class Plugin(object):
 
             containers = client.containers(filters={
                 'label': [
-                    'org.iamdork.auxiliary',
+                    'org.iamdork.auxiliary.network',
                     'com.docker.compose.project=%s' % self.auxiliary_project_name
                 ],
             })
@@ -262,7 +262,7 @@ class Plugin(object):
 
             containers = client.containers(filters={
                 'label': [
-                    'org.iamdork.auxiliary',
+                    'org.iamdork.auxiliary.network',
                     'com.docker.compose.project=%s' % self.auxiliary_project_name
                 ],
             })

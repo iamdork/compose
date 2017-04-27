@@ -4,6 +4,7 @@ services:
     image: vault:0.6.2
     labels:
     - org.iamdork.auxiliary
+    - org.iamdork.auxiliary.network
     privileged: true
     userns_mode: host
     cap_add:

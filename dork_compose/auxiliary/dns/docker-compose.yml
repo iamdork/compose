@@ -5,6 +5,7 @@ services:
     image: andyshinn/dnsmasq:2.75
     labels:
     - org.iamdork.auxiliary
+    - org.iamdork.auxiliary.network
     cap_add:
     - NET_ADMIN
     ports:
