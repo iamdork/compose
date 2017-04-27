@@ -35,12 +35,22 @@ class Plugin(dork_compose.plugin.Plugin):
     def auxiliary_project(self):
         return pkg_resources.resource_filename('dork_compose', 'auxiliary/proxy/%s' % self.https_signing)
 
+    @property
+    def virtual_host(self):
+        return self.env.get('DORK_PROXY_VIRTUAL_HOST', '')
+
     def service_domain(self, service=None):
-        return '--'.join(filter(tru, [
-            service,
-            notdefault(self.project),
-            notdefault(self.instance)
-        ])) + '.' + self.proxy_domain
+        if self.virtual_host == '':
+            return '--'.join(filter(tru, [
+                service,
+                notdefault(self.project),
+                notdefault(self.instance)
+            ])) + '.' + self.proxy_domain
+        else:
+            return '--'.join(filter(tru, [
+                service,
+                self.virtual_host
+            ]))
 
     def info(self, project):
         info = {}
