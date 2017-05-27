@@ -38,7 +38,7 @@ class Plugin(dork_compose.plugin.Plugin):
         return [VolumeSpec.parse(':'.join([
             '%s/%s/%s' % (self.env['DORK_SOURCE'], source, path),
             '%s/%s' % (root.rstrip('/'), path),
-            'rw'
+            'cached'
         ])) for path in paths]
 
     def creating_container(self, service):
