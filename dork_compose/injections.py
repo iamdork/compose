@@ -101,7 +101,7 @@ def dork_validate_service_constraints(plugins, config, service_name, version):
 
 
 def dork_validate_against_config_schema(plugins, config_file):
-    schema = load_jsonschema(config_file.version)
+    schema = load_jsonschema(config_file)
     for plugin in plugins:
         plugin.alter_config_schema(schema)
     format_checker = FormatChecker(["ports", "expose"])
@@ -179,11 +179,11 @@ class DorkService(Service, Pluggable):
         service.set_plugins(plugins)
         return service
 
-    def build(self, no_cache=False, pull=False, force_rm=False):
+    def build(self, no_cache=False, pull=False, force_rm=False, build_args_override=None):
         for plugin in self.plugins:
             plugin.building(self, no_cache, pull, force_rm)
 
-        result = super(DorkService, self).build(no_cache, pull, force_rm)
+        result = super(DorkService, self).build(no_cache, pull, force_rm, build_args_override)
 
         for plugin in self.plugins:
             plugin.after_build(self, no_cache, pull, force_rm)
@@ -242,11 +242,19 @@ class DorkProject(Project, Pluggable):
     def get_service(self, name):
         return DorkService.from_service(super(DorkProject, self).get_service(name), self.plugins)
 
-    def up(self, service_names=None, start_deps=True, strategy=ConvergenceStrategy.changed, do_build=BuildAction.none, timeout=DEFAULT_TIMEOUT, detached=False, remove_orphans=False):
+    def up(self,
+           service_names=None,
+           start_deps=True,
+           strategy=ConvergenceStrategy.changed,
+           do_build=BuildAction.none,
+           timeout=DEFAULT_TIMEOUT,
+           detached=False,
+           remove_orphans=False,
+           scale_override=None):
         for plugin in self.plugins:
             plugin.initializing(self, service_names)
 
-        containers = super(DorkProject, self).up(service_names, start_deps, strategy, do_build, timeout, detached, remove_orphans)
+        containers = super(DorkProject, self).up(service_names, start_deps, strategy, do_build, timeout, detached, remove_orphans, scale_override)
 
         for plugin in self.plugins:
             plugin.initialized(self, containers)
