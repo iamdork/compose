@@ -59,10 +59,10 @@ def dork_config_load(plugins, config_details):
 
 def get_dork_project(plugins, project_dir, config_path=None, project_name=None,
                      verbose=False, host=None, tls_config=None,
-                     environment=None):
+                     environment=None, override_dir=None):
 
     cmd.config.load = partial(dork_config_load, plugins)
-    project = get_project(project_dir, config_path, project_name, verbose, host, tls_config, environment)
+    project = get_project(project_dir, config_path, project_name, verbose, host, tls_config, environment, override_dir)
 
     if 'COMPOSE_PROJECT_NAME' in os.environ:
         project.name = os.environ['COMPOSE_PROJECT_NAME']
