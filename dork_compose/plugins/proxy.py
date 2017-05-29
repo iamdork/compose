@@ -120,7 +120,7 @@ class Plugin(dork_compose.plugin.Plugin):
                         if 'labels' not in service:
                             service['labels'] = {}
                         service['environment']['VIRTUAL_PORT'] = int(port.target)
-                        port_dict = port.repr()
+                        port_dict = {k: v for k, v in port.repr().iteritems() if k is not "published"}
                         port_dict['mode'] = 'host'
                         spec = normalize_port_dict(port_dict)
                         service['ports'][index] = ServicePort.parse(spec)[0]
