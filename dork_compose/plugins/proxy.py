@@ -1,5 +1,6 @@
 import dork_compose.plugin
 from compose.cli.docker_client import docker_client
+from compose.config.types import ServicePort, normalize_port_dict
 from dork_compose.helpers import notdefault, tru
 import os
 import urlparse
@@ -109,21 +110,20 @@ class Plugin(dork_compose.plugin.Plugin):
                 indices.reverse()
                 for index in indices:
                     port = service['ports'][index]
-                    if isinstance(port, basestring):
-                        if ':' not in port:
-                            continue
-                        (external, internal) = port.split(':')
-                        if external and internal:
-                            domain = self.service_domain() if external == '80' or external == '443' else self.service_domain(service['name'])
-                            if 'environment' not in service:
-                                service['environment'] = {}
-                            service['environment']['VIRTUAL_HOST'] = domain
-                            service['environment']['LETSENCRYPT_HOST'] = domain
-                            service['environment']['LETSENCRYPT_EMAIL'] = self.letsencrypt_email
-                            if 'labels' not in service:
-                                service['labels'] = {}
-                            service['environment']['VIRTUAL_PORT'] = int(internal)
-                            service['ports'][index] = internal
+                    if port.published:
+                        domain = self.service_domain() if port.published == '80' or port.published == '443' else self.service_domain(service['name'])
+                        if 'environment' not in service:
+                            service['environment'] = {}
+                        service['environment']['VIRTUAL_HOST'] = domain
+                        service['environment']['LETSENCRYPT_HOST'] = domain
+                        service['environment']['LETSENCRYPT_EMAIL'] = self.letsencrypt_email
+                        if 'labels' not in service:
+                            service['labels'] = {}
+                        service['environment']['VIRTUAL_PORT'] = int(port.target)
+                        port_dict = port.repr()
+                        port_dict['mode'] = 'host'
+                        spec = normalize_port_dict(port_dict)
+                        service['ports'][index] = ServicePort.parse(spec)[0]
 
     def collect_auth_files(self, services):
         files = {service: [] for service in services}
